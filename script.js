@@ -12,12 +12,16 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// إعداد مزود تسجيل الدخول الخاص بجوجل
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
 const authContainer = document.getElementById('authContainer');
 const appContainer = document.getElementById('appContainer');
 const emailInput = document.getElementById('emailInput');
 const passwordInput = document.getElementById('passwordInput');
 const loginBtn = document.getElementById('loginBtn');
 const registerBtn = document.getElementById('registerBtn');
+const googleBtn = document.getElementById('googleBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 
 const liveClock = document.getElementById('liveClock');
@@ -55,6 +59,7 @@ auth.onAuthStateChanged(user => {
     }
 });
 
+// الدخول بالإيميل والباسورد
 loginBtn.addEventListener('click', () => {
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -69,6 +74,17 @@ registerBtn.addEventListener('click', () => {
     auth.createUserWithEmailAndPassword(email, password)
         .then(() => showToast('Account created successfully!'))
         .catch(error => showToast(error.message, 'error'));
+});
+
+// الدخول باستخدام جوجل
+googleBtn.addEventListener('click', () => {
+    auth.signInWithPopup(googleProvider)
+        .then((result) => {
+            showToast('Logged in with Google successfully!');
+        })
+        .catch((error) => {
+            showToast(error.message, 'error');
+        });
 });
 
 logoutBtn.addEventListener('click', () => {

@@ -63,6 +63,35 @@ h1 {
     color: #00ff80;
     border: 1px solid #00ff80;
 }
+.auth-divider {
+    text-align: center;
+    margin: 5px 0;
+    color: #888;
+    position: relative;
+    font-size: 0.9rem;
+}
+.auth-divider::before, .auth-divider::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background-color: #3f3f50;
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after { right: 0; }
+.google-btn {
+    background-color: #ffffff;
+    color: #0f0f13;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.google-btn img {
+    width: 20px;
+    height: 20px;
+}
 .app-container {
     display: none;
     flex-direction: column;
