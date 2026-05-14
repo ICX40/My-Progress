@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Habit Tracker</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <h1>Elite Habit Tracker</h1>
+
+    <div class="auth-container" id="authContainer">
+        <h2>Welcome</h2>
+        <input type="email" class="auth-input" id="emailInput" placeholder="Email Address">
+        <input type="password" class="auth-input" id="passwordInput" placeholder="Password">
+        <button class="auth-btn" id="loginBtn">Login</button>
+        <button class="auth-btn secondary" id="registerBtn">Create Account</button>
+    </div>
+
+    <div class="app-container" id="appContainer">
+        <div class="header-top">
+            <div class="clock-container" id="liveClock"></div>
+            <div class="header-actions">
+                <select class="month-selector" id="monthSelect"></select>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <div class="current-date" id="currentDateDisplay"></div>
+        
+        <div class="tracker-container">
+            <div class="tracker-wrapper" id="trackerWrapper"></div>
+        </div>
+
+        <div class="add-habit-container">
+            <input type="text" class="add-habit-input" id="newHabitInput" placeholder="Enter new habit name...">
+            <button class="add-habit-btn" id="addHabitBtn">Add Habit</button>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
