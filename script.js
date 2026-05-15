@@ -12,7 +12,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// إعداد مزود تسجيل الدخول الخاص بجوجل
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
 const authContainer = document.getElementById('authContainer');
@@ -59,12 +58,11 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// الدخول بالإيميل والباسورد
 loginBtn.addEventListener('click', () => {
     const email = emailInput.value;
     const password = passwordInput.value;
     auth.signInWithEmailAndPassword(email, password)
-        .then(() => showToast('Logged in successfully!'))
+        .then(() => showToast('Welcome back!'))
         .catch(error => showToast(error.message, 'error'));
 });
 
@@ -76,19 +74,14 @@ registerBtn.addEventListener('click', () => {
         .catch(error => showToast(error.message, 'error'));
 });
 
-// الدخول باستخدام جوجل
 googleBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
-        .then((result) => {
-            showToast('Logged in with Google successfully!');
-        })
-        .catch((error) => {
-            showToast(error.message, 'error');
-        });
+        .then(() => showToast('Google sign-in successful!'))
+        .catch((error) => showToast(error.message, 'error'));
 });
 
 logoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => showToast('Logged out'));
+    auth.signOut().then(() => showToast('Logged out securely.'));
 });
 
 function loadUserData() {
@@ -172,7 +165,7 @@ function deleteHabit(hIndex) {
             dayArray.splice(hIndex, 1);
         });
     });
-    showToast('Habit deleted!', 'error');
+    showToast('Habit removed', 'error');
     saveUserData();
     buildGrid(monthSelect.value);
 }
@@ -255,7 +248,7 @@ function buildGrid(monthIndex) {
         
         const dragHandle = document.createElement('span');
         dragHandle.className = 'drag-handle';
-        dragHandle.innerHTML = '☰';
+        dragHandle.innerHTML = '⋮⋮';
         dragHandle.draggable = true;
 
         dragHandle.addEventListener('dragstart', (e) => {
@@ -367,7 +360,7 @@ function buildGrid(monthIndex) {
 
         const delBtn = document.createElement('button');
         delBtn.className = 'delete-btn';
-        delBtn.innerHTML = '✖';
+        delBtn.innerHTML = '⨉';
         delBtn.onclick = () => deleteHabit(hIndex);
         
         const nameSpan = document.createElement('span');
@@ -453,12 +446,12 @@ function updateAllProgress(monthIndex, daysInMonth, statusElements, habitFills, 
         const statusDiv = statusElements[d];
 
         if (isToday) {
-            statusDiv.innerHTML = '⭐<div class="percent-text">' + percent + '%</div>';
+            statusDiv.innerHTML = '<span style="color:var(--primary-gold);font-size:16px;">✦</span><div class="percent-text">' + percent + '%</div>';
         } else if (isPast) {
             if (percent === 0) {
-                statusDiv.innerHTML = '❌';
+                statusDiv.innerHTML = '<span style="opacity:0.3;">-</span>';
             } else {
-                statusDiv.innerHTML = '✔<div class="percent-text">' + percent + '%</div>';
+                statusDiv.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">✓</span><div class="percent-text" style="color:var(--text-muted)">' + percent + '%</div>';
             }
         } else {
             statusDiv.innerHTML = '';
@@ -484,7 +477,7 @@ addHabitBtn.addEventListener('click', () => {
             });
         });
         newHabitInput.value = '';
-        showToast('Habit added successfully!');
+        showToast('Habit cultivated successfully!');
         saveUserData();
         buildGrid(monthSelect.value);
     }
