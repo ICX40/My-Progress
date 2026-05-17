@@ -13,7 +13,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-// --- نظام الترجمة (Dictionary) ---
+// --- نظام الترجمة الشامل (Dictionary) ---
 const i18n = {
     en: {
         appTitle: "Elite Tracker",
@@ -115,6 +115,7 @@ const i18n = {
 const languageContainer = document.getElementById('languageContainer');
 const authContainer = document.getElementById('authContainer');
 const appContainer = document.getElementById('appContainer');
+
 const btnLangEn = document.getElementById('btnLangEn');
 const btnLangAr = document.getElementById('btnLangAr');
 
@@ -160,7 +161,7 @@ let habits = [];
 let state = {};
 let draggedIndex = null;
 let currentUser = null;
-let selectedLanguage = localStorage.getItem('elite_language');
+let selectedLanguage = 'en';
 
 // --- Functions ---
 function applyTranslations(lang) {
@@ -183,7 +184,6 @@ function applyTranslations(lang) {
 }
 
 function updateSliderText() {
-    if (!selectedLanguage) return;
     if (signUpHolder.classList.contains("switched")) {
         holderH1.innerHTML = i18n[selectedLanguage].sliderH1Switched;
         holderH3.innerHTML = i18n[selectedLanguage].sliderH3Switched;
@@ -196,7 +196,6 @@ function updateSliderText() {
 }
 
 function buildMonthSelector() {
-    if (!selectedLanguage) return;
     const mNames = i18n[selectedLanguage].monthNames;
     const currentVal = monthSelect.value;
     monthSelect.innerHTML = '';
@@ -230,34 +229,19 @@ function updateProfileInfo(user) {
     }
 }
 
-function routeApp() {
-    if (!selectedLanguage) {
-        languageContainer.style.display = 'flex';
-        authContainer.style.display = 'none';
-        appContainer.style.display = 'none';
-    } else {
-        applyTranslations(selectedLanguage);
-        languageContainer.style.display = 'none';
-        if (currentUser) {
-            authContainer.style.display = 'none';
-            appContainer.style.display = 'flex';
-        } else {
-            authContainer.style.display = 'flex';
-            appContainer.style.display = 'none';
-        }
-    }
-}
-
-// Language Listeners
+// Language Listeners - يغير اللغة ويفتح شاشة الدخول
 btnLangEn.addEventListener('click', () => {
-    localStorage.setItem('elite_language', 'en');
     selectedLanguage = 'en';
-    routeApp();
+    applyTranslations('en');
+    languageContainer.style.display = 'none';
+    authContainer.style.display = 'flex';
 });
+
 btnLangAr.addEventListener('click', () => {
-    localStorage.setItem('elite_language', 'ar');
     selectedLanguage = 'ar';
-    routeApp();
+    applyTranslations('ar');
+    languageContainer.style.display = 'none';
+    authContainer.style.display = 'flex';
 });
 
 // Profile Actions
@@ -284,7 +268,7 @@ settingsModal.addEventListener('click', (e) => {
     if (e.target === settingsModal) settingsModal.style.display = 'none';
 });
 
-// Password Toggle & Validation
+// Password Toggle
 document.querySelectorAll('.toggle-password').forEach(icon => {
     icon.addEventListener('click', function() {
         const input = this.previousElementSibling;
@@ -298,6 +282,7 @@ document.querySelectorAll('.toggle-password').forEach(icon => {
     });
 });
 
+// Password Validation
 const reqLength = document.getElementById('req-length');
 const reqUpper = document.getElementById('req-upper');
 const reqLower = document.getElementById('req-lower');
@@ -333,17 +318,27 @@ signUpPasswordInput.addEventListener('input', (e) => {
     isPasswordValid = validLength && validUpper && validLower && validNumber && validSpecial;
 });
 
-// Authentication
+// Authentication System
 auth.onAuthStateChanged(user => {
     if (user) {
         currentUser = user;
+        // لو مسجل دخول، بنطبق اللغة المحفوظة (أو بنسيبها على اختياره الحالي)
+        applyTranslations(selectedLanguage);
+        updateProfileInfo(user);
+        
+        languageContainer.style.display = 'none';
+        authContainer.style.display = 'none';
+        appContainer.style.display = 'flex';
         loadUserData();
     } else {
+        // العميل مش مسجل دخول (إجبار ظهور شاشة اللغات دائماً)
         currentUser = null;
         habits = [];
         state = {};
+        languageContainer.style.display = 'flex';
+        authContainer.style.display = 'none';
+        appContainer.style.display = 'none';
     }
-    routeApp(); 
 });
 
 loginBtn.addEventListener('click', () => {
@@ -361,10 +356,12 @@ loginBtn.addEventListener('click', () => {
 registerBtn.addEventListener('click', () => {
     const email = signUpEmailInput.value;
     const password = signUpPasswordInput.value;
+    
     if (!isPasswordValid) {
         showToast(i18n[selectedLanguage].msgReqNotMet, 'error');
         return;
     }
+
     auth.createUserWithEmailAndPassword(email, password)
         .then(() => showToast(i18n[selectedLanguage].msgAccCreated))
         .catch(error => {
@@ -401,13 +398,10 @@ googleSignUpBtn.addEventListener('click', () => {
 });
 
 logoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => {
-        // Option: clear language on logout so they can pick again, or keep it. We'll keep it for now.
-        showToast(i18n[selectedLanguage].msgLoggedOut);
-    });
+    auth.signOut().then(() => showToast(i18n[selectedLanguage].msgLoggedOut));
 });
 
-// Slider & UI
+// Slider Elements
 signUpButton.addEventListener("click", function () {
     if (!signUpHolder.classList.contains("switched")) {
         signUpHolder.classList.remove("unswitched");
