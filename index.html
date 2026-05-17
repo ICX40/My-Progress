@@ -3,38 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Habit Tracker | Premium</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
-    
+    <title>Elite Habit Tracker</title>
     <link rel="stylesheet" href="style.css">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://kit.fontawesome.com/3b31cb99f3.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <h1 class="main-title">Elite Tracker</h1>
-
-    <div class="auth-container" id="authContainer">
-        <h2>Welcome Back</h2>
-        <p class="auth-subtitle">Sign in to continue your journey</p>
-        <input type="email" class="auth-input" id="emailInput" placeholder="Email Address">
-        <input type="password" class="auth-input" id="passwordInput" placeholder="Password">
-        <button class="auth-btn" id="loginBtn">Login</button>
-        <button class="auth-btn secondary" id="registerBtn">Create Account</button>
+    <div id="authContainer" class="auth-wrapper">
+        <h1 class="main-title">Elite Tracker</h1>
         
-        <div class="auth-divider"><span>OR</span></div>
-        <button class="auth-btn google-btn" id="googleBtn">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
-            Continue with Google
-        </button>
+        <div class="login-container">
+            <div class="sign-in" id="sign-in">
+                <h2>Welcome Back</h2>
+                <p class="subtitle">Sign in to continue your journey</p>
+                
+                <div class="login-form">
+                    <div class="login-element">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="loginEmailInput" placeholder="Email Address" />
+                    </div>
+                    <div class="login-element">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="loginPasswordInput" placeholder="Password" />
+                    </div>
+                    
+                    <button class="login-button" id="loginBtn">Login</button>
+                    
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <button class="google-button" id="googleLoginBtn">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" class="google-icon" />
+                        Login with Google
+                    </button>
+                    
+                    <h4 id="mobile-sign-up" class="mobile-link">Create Account</h4>
+                </div>
+            </div>
+
+            <div class="sign-up-holder">
+                <h1 id="holder-h1">Welcome To Elite!</h1>
+                <h3 id="holder-h3">
+                    If you are new here and don't know where to start, just sign up to start your journey!
+                </h3>
+                <button id="sign-up-button">Create Account</button>
+            </div>
+
+            <div class="sign-up hidden" id="sign-up">
+                <h2>Create Account</h2>
+                <p class="subtitle">Join us and start tracking</p>
+
+                <div class="login-form">
+                    <div class="login-element">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="signUpEmailInput" placeholder="Email Address" />
+                    </div>
+                    <div class="login-element">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="signUpPasswordInput" placeholder="Password" />
+                    </div>
+                    <button class="login-button" id="registerBtn">Sign Up</button>
+
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <button class="google-button" id="googleSignUpBtn">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" class="google-icon" />
+                        Sign up with Google
+                    </button>
+
+                    <h4 id="mobile-sign-in" class="mobile-link">Already have an account?</h4>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="app-container" id="appContainer">
+    <div id="appContainer" class="app-container">
         <div class="header-top">
             <div class="clock-container" id="liveClock"></div>
             <div class="header-actions">
@@ -42,20 +92,20 @@
                 <button class="logout-btn" id="logoutBtn">Logout</button>
             </div>
         </div>
-
-        <div class="current-date" id="currentDateDisplay"></div>
+        
+        <h2 class="current-date" id="currentDateDisplay"></h2>
         
         <div class="tracker-container">
             <div class="tracker-wrapper" id="trackerWrapper"></div>
         </div>
-
+        
         <div class="add-habit-container">
-            <input type="text" class="add-habit-input" id="newHabitInput" placeholder="Cultivate a new habit...">
-            <button class="add-habit-btn" id="addHabitBtn">Initialize</button>
+            <input type="text" class="add-habit-input" id="newHabitInput" placeholder="Enter new habit...">
+            <button class="add-habit-btn" id="addHabitBtn">Add Habit</button>
         </div>
     </div>
 
-    <div class="toast-container" id="toastContainer"></div>
+    <div id="toastContainer" class="toast-container"></div>
 
     <script src="script.js"></script>
 </body>

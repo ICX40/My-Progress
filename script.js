@@ -11,16 +11,21 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
+// DOM Elements
 const authContainer = document.getElementById('authContainer');
 const appContainer = document.getElementById('appContainer');
-const emailInput = document.getElementById('emailInput');
-const passwordInput = document.getElementById('passwordInput');
+
+const loginEmailInput = document.getElementById('loginEmailInput');
+const loginPasswordInput = document.getElementById('loginPasswordInput');
+const signUpEmailInput = document.getElementById('signUpEmailInput');
+const signUpPasswordInput = document.getElementById('signUpPasswordInput');
+
 const loginBtn = document.getElementById('loginBtn');
 const registerBtn = document.getElementById('registerBtn');
-const googleBtn = document.getElementById('googleBtn');
+const googleLoginBtn = document.getElementById('googleLoginBtn');
+const googleSignUpBtn = document.getElementById('googleSignUpBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 
 const liveClock = document.getElementById('liveClock');
@@ -31,8 +36,17 @@ const newHabitInput = document.getElementById('newHabitInput');
 const addHabitBtn = document.getElementById('addHabitBtn');
 const toastContainer = document.getElementById('toastContainer');
 
-const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+// Slider Elements
+let signUpButton = document.getElementById("sign-up-button");
+let signUpHolder = document.querySelector(".sign-up-holder");
+let signIn = document.getElementById("sign-in");
+let signUp = document.getElementById("sign-up");
+let holderH1 = document.getElementById("holder-h1");
+let holderH3 = document.getElementById("holder-h3");
+let mobileSignUp = document.getElementById("mobile-sign-up");
+let mobileSignIn = document.getElementById("mobile-sign-in");
 
+const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const currentDate = new Date();
 const currentYear = currentDate.getFullYear();
 const currentRealMonth = currentDate.getMonth();
@@ -42,6 +56,8 @@ let habits = [];
 let state = {};
 let draggedIndex = null;
 let currentUser = null;
+
+// --- نظام تسجيل الدخول والتحقق ---
 
 auth.onAuthStateChanged(user => {
     if (user) {
@@ -58,32 +74,115 @@ auth.onAuthStateChanged(user => {
     }
 });
 
+// 1. تسجيل الدخول بالايميل
 loginBtn.addEventListener('click', () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+    const email = loginEmailInput.value;
+    const password = loginPasswordInput.value;
     auth.signInWithEmailAndPassword(email, password)
         .then(() => showToast('Welcome back!'))
-        .catch(error => showToast(error.message, 'error'));
+        .catch(error => {
+            if (error.code === 'auth/user-not-found') {
+                alert("أنت لا تمتلك حساباً مسجلاً بهذا البريد! الرجاء إنشاء حساب جديد.");
+            } else if (error.code === 'auth/wrong-password') {
+                alert("كلمة المرور غير صحيحة!");
+            } else {
+                showToast(error.message, 'error');
+            }
+        });
 });
 
+// 2. إنشاء حساب بالايميل
 registerBtn.addEventListener('click', () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+    const email = signUpEmailInput.value;
+    const password = signUpPasswordInput.value;
     auth.createUserWithEmailAndPassword(email, password)
         .then(() => showToast('Account created successfully!'))
-        .catch(error => showToast(error.message, 'error'));
+        .catch(error => {
+            if (error.code === 'auth/email-already-in-use') {
+                alert("عفواً، أنت تمتلك حساباً بالفعل بهذا البريد! الرجاء تسجيل الدخول.");
+            } else {
+                showToast(error.message, 'error');
+            }
+        });
 });
 
-googleBtn.addEventListener('click', () => {
+// 3. تسجيل الدخول بواسطة جوجل (التحقق من عدم وجود حساب)
+googleLoginBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
-        .then(() => showToast('Google sign-in successful!'))
+        .then((result) => {
+            // isNewUser تعني أن Firebase قام بإنشاء حساب جديد له للتو
+            if (result.additionalUserInfo.isNewUser) {
+                // نحذف الحساب الوهمي الذي تم إنشاؤه ونوجهه للتسجيل
+                result.user.delete().then(() => {
+                    auth.signOut();
+                    alert("لا يوجد حساب مرتبط ببريد Google هذا! الرجاء الذهاب لإنشاء حساب جديد أولاً.");
+                });
+            } else {
+                showToast('Google sign-in successful!');
+            }
+        })
         .catch((error) => showToast(error.message, 'error'));
 });
 
+// 4. إنشاء حساب بواسطة جوجل (التحقق من أن الحساب موجود بالفعل)
+googleSignUpBtn.addEventListener('click', () => {
+    auth.signInWithPopup(googleProvider)
+        .then((result) => {
+            // إذا لم يكن مستخدم جديد، معناه انه سجل من قبل
+            if (!result.additionalUserInfo.isNewUser) {
+                alert("أنت تمتلك حساباً بالفعل مرتبطاً بـ Google هذا! تم تسجيل دخولك بنجاح.");
+            } else {
+                showToast('Account created successfully with Google!');
+            }
+        })
+        .catch((error) => showToast(error.message, 'error'));
+});
+
+// تسجيل الخروج
 logoutBtn.addEventListener('click', () => {
     auth.signOut().then(() => showToast('Logged out securely.'));
 });
 
+// --- حركة اللوحة الجانبية (Slider) ---
+signUpButton.addEventListener("click", function () {
+    if (!signUpHolder.classList.contains("switched")) {
+        signUpHolder.classList.remove("unswitched");
+        signUpHolder.classList.add("switched");
+        signUp.classList.remove("hidden");
+        signIn.classList.add("hidden");
+        holderH1.innerHTML = "Already have an account?";
+        holderH3.innerHTML = "Sign-in to continue tracking your progress!";
+        signUpButton.innerHTML = "Sign In";
+    } else {
+        signUpHolder.classList.remove("switched");
+        signUpHolder.classList.add("unswitched");
+        signIn.classList.remove("hidden");
+        signUp.classList.add("hidden");
+        holderH1.innerHTML = "Welcome To Elite!";
+        holderH3.innerHTML = "If you are new here and don't know where to start, just sign up!";
+        signUpButton.innerHTML = "Create Account";
+    }
+});
+
+mobileSignUp.addEventListener("click", function () {
+    signIn.classList.add("hidden");
+    setTimeout(() => {
+        signIn.style.display = "none";
+        signUp.style.display = "flex";
+        setTimeout(() => signUp.classList.remove("hidden"), 50);
+    }, 300);
+});
+
+mobileSignIn.addEventListener("click", function () {
+    signUp.classList.add("hidden");
+    setTimeout(() => {
+        signUp.style.display = "none";
+        signIn.style.display = "flex";
+        setTimeout(() => signIn.classList.remove("hidden"), 50);
+    }, 300);
+});
+
+// --- وظائف التطبيق (Habit Tracker Logic) ---
 function loadUserData() {
     db.collection('users').doc(currentUser.uid).get().then(doc => {
         if (doc.exists) {
@@ -95,7 +194,7 @@ function loadUserData() {
             state = {};
         }
         buildGrid(currentRealMonth);
-    }).catch(error => showToast('Error loading data', 'error'));
+    }).catch(error => console.log(error));
 }
 
 function saveUserData() {
@@ -296,64 +395,6 @@ function buildGrid(monthIndex) {
             }
             if (draggedIndex !== targetIndex) {
                 reorderHabits(draggedIndex, targetIndex);
-            }
-            draggedIndex = null;
-        });
-
-        dragHandle.addEventListener('touchstart', (e) => {
-            draggedIndex = hIndex;
-            row.classList.add('dragging');
-        }, {passive: true});
-
-        dragHandle.addEventListener('touchmove', (e) => {
-            if (e.cancelable) e.preventDefault();
-            if (draggedIndex === null) return;
-            
-            const touch = e.touches[0];
-            const target = document.elementFromPoint(touch.clientX, touch.clientY);
-            const targetRow = target ? target.closest('.habit-row') : null;
-            
-            document.querySelectorAll('.habit-row').forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
-            
-            if (targetRow && targetRow !== row) {
-                const targetIdx = parseInt(targetRow.getAttribute('data-index'));
-                if(!isNaN(targetIdx)) {
-                    const bounding = targetRow.getBoundingClientRect();
-                    const offset = bounding.y + (bounding.height / 2);
-                    if (touch.clientY - offset > 0) {
-                        targetRow.classList.add('drag-over-bottom');
-                    } else {
-                        targetRow.classList.add('drag-over-top');
-                    }
-                }
-            }
-        }, {passive: false});
-
-        dragHandle.addEventListener('touchend', (e) => {
-            row.classList.remove('dragging');
-            if (draggedIndex === null) return;
-
-            const touch = e.changedTouches[0];
-            const target = document.elementFromPoint(touch.clientX, touch.clientY);
-            const targetRow = target ? target.closest('.habit-row') : null;
-            
-            document.querySelectorAll('.habit-row').forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
-            
-            if (targetRow && targetRow !== row) {
-                let targetIndex = parseInt(targetRow.getAttribute('data-index'));
-                if (!isNaN(targetIndex)) {
-                    const bounding = targetRow.getBoundingClientRect();
-                    const offset = bounding.y + (bounding.height / 2);
-                    if (touch.clientY - offset > 0) {
-                        targetIndex++;
-                    }
-                    if (draggedIndex < targetIndex) {
-                        targetIndex--;
-                    }
-                    if (draggedIndex !== targetIndex) {
-                        reorderHabits(draggedIndex, targetIndex);
-                    }
-                }
             }
             draggedIndex = null;
         });
