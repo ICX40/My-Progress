@@ -52,7 +52,7 @@ body {
     background-color: var(--bg-surface);
     width: 100%;
     max-width: 850px;
-    height: 550px;
+    height: 600px; /* تم زيادة الطول قليلاً لاستيعاب الزرين */
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     border: 1px solid var(--border-color);
@@ -81,7 +81,7 @@ body {
 .subtitle {
     color: var(--text-muted);
     font-size: 14px;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 
 .login-form {
@@ -89,7 +89,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .login-element {
@@ -98,7 +98,7 @@ body {
     background-color: rgba(9, 9, 11, 0.8);
     border: 1px solid var(--border-color);
     width: 100%;
-    height: 50px;
+    height: 45px;
     border-radius: 12px;
     padding: 0 15px;
     transition: 0.3s;
@@ -115,7 +115,7 @@ body {
     outline: none;
     width: 100%;
     height: 100%;
-    font-size: 16px;
+    font-size: 15px;
     color: var(--text-main);
     padding-left: 10px;
     font-family: inherit;
@@ -123,20 +123,20 @@ body {
 
 .login-element i {
     color: var(--text-muted);
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .login-button {
     width: 100%;
-    height: 50px;
+    height: 45px;
     border-radius: 12px;
     border: none;
     background: linear-gradient(135deg, var(--primary-gold), #b28d22);
     color: #000;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     font-family: inherit;
-    margin-top: 10px;
+    margin-top: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px var(--primary-gold-glow);
@@ -147,14 +147,21 @@ body {
     box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
 }
 
+.social-auth-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .google-button {
     width: 100%;
-    height: 50px;
+    height: 45px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
     background-color: #fff;
     color: #09090b;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -169,9 +176,32 @@ body {
     box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
 }
 
-.google-icon {
-    width: 22px;
-    height: 22px;
+/* ستايل زر الفيسبوك الجديد */
+.facebook-button {
+    width: 100%;
+    height: 45px;
+    border-radius: 12px;
+    border: 1px solid #1877F2;
+    background-color: #1877F2;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.facebook-button:hover {
+    background-color: #166FE5;
+    box-shadow: 0 4px 15px rgba(24, 119, 242, 0.4);
+}
+
+.social-icon {
+    width: 20px;
+    height: 20px;
     object-fit: contain;
 }
 
@@ -182,7 +212,7 @@ body {
     text-align: center;
     color: var(--text-muted);
     font-size: 12px;
-    margin: 5px 0;
+    margin: 2px 0;
 }
 
 .divider::before, .divider::after {
@@ -444,7 +474,6 @@ body {
     color: var(--text-main);
 }
 
-/* --- أزرار التحكم الجديدة (تعديل وحذف) مع الخلفية الشفافة --- */
 .action-btns {
     display: flex;
     gap: 10px;
@@ -484,7 +513,6 @@ body {
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-/* مربع الكتابة الذي يظهر عند التعديل (إصلاح اللون الأبيض) */
 .edit-input {
     background-color: var(--bg-main) !important; 
     border: 1px solid var(--primary-gold) !important;
