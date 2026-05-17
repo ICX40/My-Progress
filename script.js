@@ -13,7 +13,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-// --- نظام الترجمة الشامل (Dictionary) ---
+// --- نظام الترجمة (Dictionary) ---
 const i18n = {
     en: {
         appTitle: "Elite Tracker",
@@ -23,7 +23,7 @@ const i18n = {
         password: "Password",
         loginBtn: "Login",
         or: "OR",
-        loginGoogle: "Login with Google",
+        loginGoogle: "Continue with Google",
         mobileCreate: "Create Account",
         sliderH1Unswitched: "Welcome To Elite!",
         sliderH3Unswitched: "If you are new here and don't know where to start, just sign up to start your journey!",
@@ -39,9 +39,12 @@ const i18n = {
         reqNumber: "Number (0-9)",
         reqSpecial: "Special character (!@#$%^&*)",
         signUpBtn: "Sign Up",
-        signUpGoogle: "Sign up with Google",
+        signUpGoogle: "Continue with Google",
         mobileAlready: "Already have an account?",
         logout: "Logout",
+        settings: "Account Settings",
+        profileName: "Name",
+        profileDate: "Joined On",
         newHabit: "Enter new habit...",
         addHabit: "Add Habit",
         msgWelcomeBack: "Welcome back!",
@@ -67,7 +70,7 @@ const i18n = {
         password: "كلمة المرور",
         loginBtn: "تسجيل الدخول",
         or: "أو",
-        loginGoogle: "تسجيل الدخول بـ Google",
+        loginGoogle: "التسجيل بواسطة Google",
         mobileCreate: "إنشاء حساب",
         sliderH1Unswitched: "مرحباً بك في إليت!",
         sliderH3Unswitched: "إذا كنت جديداً هنا، فقط قم بإنشاء حساب لتبدأ رحلتك وتحقق أهدافك!",
@@ -86,6 +89,9 @@ const i18n = {
         signUpGoogle: "التسجيل بواسطة Google",
         mobileAlready: "لديك حساب بالفعل؟",
         logout: "تسجيل الخروج",
+        settings: "إعدادات الحساب",
+        profileName: "الاسم",
+        profileDate: "تاريخ الانضمام",
         newHabit: "أدخل عادة جديدة...",
         addHabit: "إضافة عادة",
         msgWelcomeBack: "مرحباً بعودتك!",
@@ -109,7 +115,6 @@ const i18n = {
 const languageContainer = document.getElementById('languageContainer');
 const authContainer = document.getElementById('authContainer');
 const appContainer = document.getElementById('appContainer');
-
 const btnLangEn = document.getElementById('btnLangEn');
 const btnLangAr = document.getElementById('btnLangAr');
 
@@ -117,12 +122,17 @@ const loginEmailInput = document.getElementById('loginEmailInput');
 const loginPasswordInput = document.getElementById('loginPasswordInput');
 const signUpEmailInput = document.getElementById('signUpEmailInput');
 const signUpPasswordInput = document.getElementById('signUpPasswordInput');
-
 const loginBtn = document.getElementById('loginBtn');
 const registerBtn = document.getElementById('registerBtn');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
 const googleSignUpBtn = document.getElementById('googleSignUpBtn');
+
+const userProfileBtn = document.getElementById('userProfileBtn');
+const profileDropdown = document.getElementById('profileDropdown');
+const openSettingsBtn = document.getElementById('openSettingsBtn');
 const logoutBtn = document.getElementById('logoutBtn');
+const settingsModal = document.getElementById('settingsModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
 
 const liveClock = document.getElementById('liveClock');
 const monthSelect = document.getElementById('monthSelect');
@@ -150,28 +160,30 @@ let habits = [];
 let state = {};
 let draggedIndex = null;
 let currentUser = null;
-let selectedLanguage = 'en';
+let selectedLanguage = localStorage.getItem('elite_language');
 
+// --- Functions ---
 function applyTranslations(lang) {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
-
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if(i18n[lang][key]) el.innerHTML = i18n[lang][key];
     });
-
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         const key = el.getAttribute('data-i18n-placeholder');
         if(i18n[lang][key]) el.placeholder = i18n[lang][key];
     });
-
     updateSliderText();
     buildMonthSelector();
-    if (currentUser) buildGrid(monthSelect.value || currentRealMonth);
+    if (currentUser) {
+        buildGrid(monthSelect.value || currentRealMonth);
+        updateProfileInfo(currentUser); 
+    }
 }
 
 function updateSliderText() {
+    if (!selectedLanguage) return;
     if (signUpHolder.classList.contains("switched")) {
         holderH1.innerHTML = i18n[selectedLanguage].sliderH1Switched;
         holderH3.innerHTML = i18n[selectedLanguage].sliderH3Switched;
@@ -184,6 +196,7 @@ function updateSliderText() {
 }
 
 function buildMonthSelector() {
+    if (!selectedLanguage) return;
     const mNames = i18n[selectedLanguage].monthNames;
     const currentVal = monthSelect.value;
     monthSelect.innerHTML = '';
@@ -196,33 +209,91 @@ function buildMonthSelector() {
     });
 }
 
+function updateProfileInfo(user) {
+    const displayName = user.displayName || user.email.split('@')[0];
+    const defaultPhoto = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=d4af37&color=000&bold=true`;
+    const photoURL = user.photoURL || defaultPhoto;
+
+    document.getElementById('userAvatar').src = photoURL;
+    document.getElementById('userNameDisplay').textContent = displayName;
+    document.getElementById('modalAvatar').src = photoURL;
+    document.getElementById('modalName').textContent = displayName;
+
+    if(user.metadata && user.metadata.creationTime) {
+        const creationTime = new Date(user.metadata.creationTime);
+        const locale = selectedLanguage === 'ar' ? 'ar-EG' : 'en-US';
+        const formattedDate = creationTime.toLocaleString(locale, {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+        });
+        document.getElementById('modalDate').textContent = formattedDate;
+    }
+}
+
+function routeApp() {
+    if (!selectedLanguage) {
+        languageContainer.style.display = 'flex';
+        authContainer.style.display = 'none';
+        appContainer.style.display = 'none';
+    } else {
+        applyTranslations(selectedLanguage);
+        languageContainer.style.display = 'none';
+        if (currentUser) {
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'flex';
+        } else {
+            authContainer.style.display = 'flex';
+            appContainer.style.display = 'none';
+        }
+    }
+}
+
+// Language Listeners
 btnLangEn.addEventListener('click', () => {
     localStorage.setItem('elite_language', 'en');
     selectedLanguage = 'en';
-    applyTranslations('en');
-    languageContainer.style.display = 'none';
-    authContainer.style.display = 'flex';
+    routeApp();
 });
-
 btnLangAr.addEventListener('click', () => {
     localStorage.setItem('elite_language', 'ar');
     selectedLanguage = 'ar';
-    applyTranslations('ar');
-    languageContainer.style.display = 'none';
-    authContainer.style.display = 'flex';
+    routeApp();
 });
 
+// Profile Actions
+userProfileBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    profileDropdown.classList.toggle('show');
+    document.querySelector('.user-profile-container').classList.toggle('active');
+});
+
+document.addEventListener('click', (e) => {
+    if (!profileDropdown.contains(e.target) && !userProfileBtn.contains(e.target)) {
+        profileDropdown.classList.remove('show');
+        document.querySelector('.user-profile-container').classList.remove('active');
+    }
+});
+
+openSettingsBtn.addEventListener('click', () => {
+    settingsModal.style.display = 'flex';
+});
+closeModalBtn.addEventListener('click', () => {
+    settingsModal.style.display = 'none';
+});
+settingsModal.addEventListener('click', (e) => {
+    if (e.target === settingsModal) settingsModal.style.display = 'none';
+});
+
+// Password Toggle & Validation
 document.querySelectorAll('.toggle-password').forEach(icon => {
     icon.addEventListener('click', function() {
         const input = this.previousElementSibling;
         if (input.type === 'password') {
             input.type = 'text';
-            this.classList.remove('fa-eye-slash');
-            this.classList.add('fa-eye');
+            this.classList.replace('fa-eye-slash', 'fa-eye');
         } else {
             input.type = 'password';
-            this.classList.remove('fa-eye');
-            this.classList.add('fa-eye-slash');
+            this.classList.replace('fa-eye', 'fa-eye-slash');
         }
     });
 });
@@ -262,24 +333,17 @@ signUpPasswordInput.addEventListener('input', (e) => {
     isPasswordValid = validLength && validUpper && validLower && validNumber && validSpecial;
 });
 
+// Authentication
 auth.onAuthStateChanged(user => {
     if (user) {
         currentUser = user;
-        selectedLanguage = localStorage.getItem('elite_language') || 'en';
-        applyTranslations(selectedLanguage);
-        
-        languageContainer.style.display = 'none';
-        authContainer.style.display = 'none';
-        appContainer.style.display = 'flex';
         loadUserData();
     } else {
         currentUser = null;
         habits = [];
         state = {};
-        languageContainer.style.display = 'flex';
-        authContainer.style.display = 'none';
-        appContainer.style.display = 'none';
     }
+    routeApp(); 
 });
 
 loginBtn.addEventListener('click', () => {
@@ -297,12 +361,10 @@ loginBtn.addEventListener('click', () => {
 registerBtn.addEventListener('click', () => {
     const email = signUpEmailInput.value;
     const password = signUpPasswordInput.value;
-    
     if (!isPasswordValid) {
         showToast(i18n[selectedLanguage].msgReqNotMet, 'error');
         return;
     }
-
     auth.createUserWithEmailAndPassword(email, password)
         .then(() => showToast(i18n[selectedLanguage].msgAccCreated))
         .catch(error => {
@@ -339,9 +401,13 @@ googleSignUpBtn.addEventListener('click', () => {
 });
 
 logoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => showToast(i18n[selectedLanguage].msgLoggedOut));
+    auth.signOut().then(() => {
+        // Option: clear language on logout so they can pick again, or keep it. We'll keep it for now.
+        showToast(i18n[selectedLanguage].msgLoggedOut);
+    });
 });
 
+// Slider & UI
 signUpButton.addEventListener("click", function () {
     if (!signUpHolder.classList.contains("switched")) {
         signUpHolder.classList.remove("unswitched");
@@ -359,22 +425,15 @@ signUpButton.addEventListener("click", function () {
 
 mobileSignUp.addEventListener("click", function () {
     signIn.classList.add("hidden");
-    setTimeout(() => {
-        signIn.style.display = "none";
-        signUp.style.display = "flex";
-        setTimeout(() => signUp.classList.remove("hidden"), 50);
-    }, 300);
+    setTimeout(() => { signIn.style.display = "none"; signUp.style.display = "flex"; setTimeout(() => signUp.classList.remove("hidden"), 50); }, 300);
 });
 
 mobileSignIn.addEventListener("click", function () {
     signUp.classList.add("hidden");
-    setTimeout(() => {
-        signUp.style.display = "none";
-        signIn.style.display = "flex";
-        setTimeout(() => signIn.classList.remove("hidden"), 50);
-    }, 300);
+    setTimeout(() => { signUp.style.display = "none"; signIn.style.display = "flex"; setTimeout(() => signIn.classList.remove("hidden"), 50); }, 300);
 });
 
+// Tracker Functions
 function loadUserData() {
     db.collection('users').doc(currentUser.uid).get().then(doc => {
         if (doc.exists) {
@@ -391,10 +450,7 @@ function loadUserData() {
 
 function saveUserData() {
     if (!currentUser) return;
-    db.collection('users').doc(currentUser.uid).set({
-        habits: habits,
-        state: JSON.stringify(state)
-    }).catch(error => showToast('Error saving data', 'error'));
+    db.collection('users').doc(currentUser.uid).set({ habits: habits, state: JSON.stringify(state) }).catch(error => console.log(error));
 }
 
 function showToast(message, type = 'success') {
@@ -402,16 +458,13 @@ function showToast(message, type = 'success') {
     toast.className = `toast ${type}`;
     toast.textContent = message;
     toastContainer.appendChild(toast);
-    setTimeout(() => {
-        if (toast.parentElement) toast.remove();
-    }, 3000);
+    setTimeout(() => { if (toast.parentElement) toast.remove(); }, 3000);
 }
 
 function updateClock() {
     const now = new Date();
     liveClock.textContent = now.toLocaleTimeString('en-US', { hour12: true });
 }
-
 setInterval(updateClock, 1000);
 updateClock();
 
@@ -432,9 +485,7 @@ function calculateDayProgress(monthIndex, dayIndex) {
 function calculateHabitProgress(monthIndex, habitIndex, daysInMonth) {
     let completed = 0;
     for (let i = 0; i < daysInMonth; i++) {
-        if (state[monthIndex][i][habitIndex]) {
-            completed++;
-        }
+        if (state[monthIndex][i][habitIndex]) completed++;
     }
     return Math.round((completed / daysInMonth) * 100);
 }
@@ -442,9 +493,7 @@ function calculateHabitProgress(monthIndex, habitIndex, daysInMonth) {
 function deleteHabit(hIndex) {
     habits.splice(hIndex, 1);
     Object.keys(state).forEach(month => {
-        state[month].forEach(dayArray => {
-            dayArray.splice(hIndex, 1);
-        });
+        state[month].forEach(dayArray => { dayArray.splice(hIndex, 1); });
     });
     showToast(i18n[selectedLanguage].msgHabitRemoved, 'error');
     saveUserData();
@@ -454,7 +503,6 @@ function deleteHabit(hIndex) {
 function reorderHabits(oldIndex, newIndex) {
     const movedHabit = habits.splice(oldIndex, 1)[0];
     habits.splice(newIndex, 0, movedHabit);
-
     Object.keys(state).forEach(month => {
         state[month].forEach(dayArray => {
             const movedState = dayArray.splice(oldIndex, 1)[0];
@@ -475,45 +523,37 @@ function buildGrid(monthIndex) {
 
     const headerRow = document.createElement('div');
     headerRow.className = 'row header-row';
-    
     const emptyCorner = document.createElement('div');
     emptyCorner.className = 'habit-name';
     headerRow.appendChild(emptyCorner);
 
     const daysGrid = document.createElement('div');
     daysGrid.className = 'grid-container';
-
     const statusElements = [];
 
     for (let d = 0; d < daysInMonth; d++) {
         const column = document.createElement('div');
         column.className = 'column';
-
         const statusDiv = document.createElement('div');
         statusDiv.className = 'day-status';
         statusElements.push(statusDiv);
-
         const numberDiv = document.createElement('div');
         numberDiv.className = 'day-number';
         numberDiv.textContent = d + 1;
-
         if (d + 1 === currentRealDay && monthIndex === currentRealMonth) {
             numberDiv.classList.add('today-highlight');
         }
-
         column.appendChild(statusDiv);
         column.appendChild(numberDiv);
         daysGrid.appendChild(column);
     }
 
     headerRow.appendChild(daysGrid);
-    
     const dummyProgress = document.createElement('div');
     dummyProgress.className = 'progress-section';
     dummyProgress.style.visibility = 'hidden';
     dummyProgress.innerHTML = '<div class="progress-bar-container"></div><div class="percentage-text">100%</div>';
     headerRow.appendChild(dummyProgress);
-
     trackerWrapper.appendChild(headerRow);
 
     const habitFills = [];
@@ -526,7 +566,6 @@ function buildGrid(monthIndex) {
 
         const nameDiv = document.createElement('div');
         nameDiv.className = 'habit-name';
-        
         const dragHandle = document.createElement('span');
         dragHandle.className = 'drag-handle';
         dragHandle.innerHTML = '⋮⋮';
@@ -537,12 +576,10 @@ function buildGrid(monthIndex) {
             row.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
         });
-
         dragHandle.addEventListener('dragend', () => {
             row.classList.remove('dragging');
             document.querySelectorAll('.habit-row').forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
         });
-
         row.addEventListener('dragover', (e) => {
             e.preventDefault();
             if(draggedIndex === null || draggedIndex === hIndex) return;
@@ -556,25 +593,18 @@ function buildGrid(monthIndex) {
                 row.classList.add('drag-over-top');
             }
         });
-
         row.addEventListener('dragleave', () => {
             row.classList.remove('drag-over-top', 'drag-over-bottom');
         });
-
         row.addEventListener('drop', (e) => {
             e.preventDefault();
             row.classList.remove('drag-over-top', 'drag-over-bottom');
             if (draggedIndex === null || draggedIndex === hIndex) return;
-            
             const bounding = row.getBoundingClientRect();
             const offset = bounding.y + (bounding.height / 2);
             let targetIndex = hIndex;
-            if (e.clientY - offset > 0) {
-                targetIndex++;
-            }
-            if (draggedIndex < targetIndex) {
-                targetIndex--;
-            }
+            if (e.clientY - offset > 0) targetIndex++;
+            if (draggedIndex < targetIndex) targetIndex--;
             if (draggedIndex !== targetIndex) {
                 reorderHabits(draggedIndex, targetIndex);
             }
@@ -583,11 +613,9 @@ function buildGrid(monthIndex) {
 
         const actionBtns = document.createElement('div');
         actionBtns.className = 'action-btns';
-
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
         editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
-        
         const delBtn = document.createElement('button');
         delBtn.className = 'delete-btn';
         delBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
@@ -599,14 +627,11 @@ function buildGrid(monthIndex) {
 
         editBtn.onclick = () => {
             if (nameDiv.querySelector('.edit-input')) return;
-
             const currentText = nameSpan.textContent;
-            
             const input = document.createElement('input');
             input.type = 'text';
             input.value = currentText;
             input.className = 'edit-input';
-
             nameDiv.replaceChild(input, nameSpan);
             input.focus();
 
@@ -622,15 +647,12 @@ function buildGrid(monthIndex) {
 
             input.addEventListener('blur', saveChanges);
             input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    input.blur(); 
-                }
+                if (e.key === 'Enter') input.blur(); 
             });
         };
 
         actionBtns.appendChild(editBtn);
         actionBtns.appendChild(delBtn);
-
         nameDiv.appendChild(dragHandle);
         nameDiv.appendChild(actionBtns);
         nameDiv.appendChild(nameSpan);
@@ -642,7 +664,6 @@ function buildGrid(monthIndex) {
         for (let d = 0; d < daysInMonth; d++) {
             const column = document.createElement('div');
             column.className = 'column';
-
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'day-checkbox';
@@ -650,10 +671,7 @@ function buildGrid(monthIndex) {
 
             const dayNum = d + 1;
             const isToday = monthIndex === currentRealMonth && dayNum === currentRealDay;
-            
-            if (!isToday) {
-                checkbox.disabled = true;
-            }
+            if (!isToday) checkbox.disabled = true;
 
             checkbox.addEventListener('change', (e) => {
                 state[monthIndex][d][hIndex] = e.target.checked;
@@ -669,14 +687,11 @@ function buildGrid(monthIndex) {
 
         const progressSection = document.createElement('div');
         progressSection.className = 'progress-section';
-        
         const barContainer = document.createElement('div');
         barContainer.className = 'progress-bar-container';
-        
         const fill = document.createElement('div');
         fill.className = 'progress-fill';
         habitFills.push(fill);
-        
         const text = document.createElement('div');
         text.className = 'percentage-text';
         text.textContent = '0%';
@@ -685,7 +700,6 @@ function buildGrid(monthIndex) {
         barContainer.appendChild(fill);
         progressSection.appendChild(barContainer);
         progressSection.appendChild(text);
-        
         row.appendChild(progressSection);
         trackerWrapper.appendChild(row);
     });
@@ -701,12 +715,10 @@ function buildGrid(monthIndex) {
 
 function updateAllProgress(monthIndex, daysInMonth, statusElements, habitFills, habitTexts) {
     if (habits.length === 0) return;
-
     for (let d = 0; d < daysInMonth; d++) {
         const dayNum = d + 1;
         const isPast = monthIndex < currentRealMonth || (monthIndex === currentRealMonth && dayNum < currentRealDay);
         const isToday = monthIndex === currentRealMonth && dayNum === currentRealDay;
-        
         const percent = calculateDayProgress(monthIndex, d);
         const statusDiv = statusElements[d];
 
@@ -749,9 +761,7 @@ addHabitBtn.addEventListener('click', () => {
 });
 
 newHabitInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        addHabitBtn.click();
-    }
+    if (e.key === 'Enter') addHabitBtn.click();
 });
 
 monthSelect.addEventListener('change', function(e) {

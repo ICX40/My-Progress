@@ -27,48 +27,40 @@ body {
     padding: 20px;
 }
 
-/* ---------------------------------------------------- */
-/* الإصلاح الشامل لاتجاهات التصميم في اللغة العربية RTL */
-/* ---------------------------------------------------- */
+/* --- دعم اللغة العربية RTL بشكل سليم 100% --- */
 [dir="rtl"] {
     font-family: 'Cairo', sans-serif;
 }
-
 [dir="rtl"] .sign-up-holder {
     left: auto;
     right: 50%;
-    /* اللوحة في الشمال، الانحناء يكون للداخل من جهة اليمين */
+    /* اللوحة في الشمال (الحالة الأولى)، الانحناء من جهة اليمين */
     border-radius: 0;
     border-top-right-radius: 30%;
     border-bottom-right-radius: 30%;
 }
-
 [dir="rtl"] .switched {
     transform: translateX(100%);
-    /* اللوحة تتحرك لليمين، الانحناء يكون للداخل من جهة اليسار */
+    /* اللوحة تتحرك لليمين، الانحناء يصبح من جهة اليسار */
     border-radius: 0;
     border-top-left-radius: 30%;
     border-bottom-left-radius: 30%;
 }
-
 [dir="rtl"] .unswitched {
     transform: translateX(0%);
-    /* ترجع لليسار، يرجع الانحناء لليمين */
+    /* اللوحة ترجع لليسار، يرجع الانحناء لليمين */
     border-radius: 0;
     border-top-right-radius: 30%;
     border-bottom-right-radius: 30%;
 }
-
 [dir="rtl"] .login-element input {
     padding-left: 35px;
     padding-right: 10px;
 }
-
 [dir="rtl"] .toggle-password {
     right: auto;
     left: 15px;
 }
-
 [dir="rtl"] .habit-name {
     padding-right: 0;
     padding-left: 15px;
@@ -77,28 +69,45 @@ body {
     right: 0; 
     left: auto;
 }
-
 [dir="rtl"] .action-btns {
     margin-right: 0;
     margin-left: 15px;
 }
-
 [dir="rtl"] .drag-handle {
     margin-right: 0;
     margin-left: 12px;
 }
-
 [dir="rtl"] .progress-section {
     margin-left: 0;
     margin-right: 25px;
     padding-right: 0;
     padding-left: 15px;
 }
-
 [dir="rtl"] .percentage-text {
     margin-left: 0;
     margin-right: 15px;
     text-align: left;
+}
+[dir="rtl"] .dropdown-menu {
+    right: auto;
+    left: 0;
+}
+[dir="rtl"] .dropdown-menu button {
+    text-align: right;
+}
+[dir="rtl"] .close-modal {
+    right: auto;
+    left: 15px;
+}
+
+/* حل مشكلة الإكمال التلقائي */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 50px rgba(9, 9, 11, 0.9) inset !important;
+    -webkit-text-fill-color: var(--text-main) !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 /* --- تصميم شاشة اللغات --- */
@@ -176,17 +185,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* حل مشكلة الإكمال التلقائي */
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 50px rgba(9, 9, 11, 0.9) inset !important;
-    -webkit-text-fill-color: var(--text-main) !important;
-    transition: background-color 5000s ease-in-out 0s;
-}
-
-/* --- Authentication Section --- */
 .auth-wrapper {
     display: flex;
     flex-direction: column;
@@ -485,7 +483,6 @@ input:-webkit-autofill:active {
     font-weight: 500;
 }
 
-/* --- App Section --- */
 .app-container {
     display: none;
     flex-direction: column;
@@ -513,22 +510,205 @@ input:-webkit-autofill:active {
     align-items: center;
 }
 
-.logout-btn {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: var(--danger);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    padding: 10px 18px;
-    border-radius: 10px;
-    font-weight: 600;
-    font-family: inherit;
+/* --- تصميم الملف الشخصي والقائمة المنسدلة --- */
+.user-profile-container {
+    position: relative;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     cursor: pointer;
+    padding: 6px 12px 6px 6px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.3s ease;
 }
 
-.logout-btn:hover {
-    background-color: var(--danger);
-    color: #fff;
+.user-profile:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-gold);
 }
+
+.user-profile img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--primary-gold);
+}
+
+.user-profile span {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-main);
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-arrow {
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: 0.3s ease;
+}
+
+.user-profile-container.active .dropdown-arrow {
+    transform: rotate(180deg);
+    color: var(--primary-gold);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-menu button {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    padding: 14px 18px;
+    text-align: left;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.2s ease;
+    width: 100%;
+}
+
+.dropdown-menu button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--primary-gold);
+}
+
+.dropdown-menu button i {
+    width: 16px;
+    font-size: 15px;
+}
+
+#logoutBtn {
+    border-top: 1px solid var(--border-color);
+}
+#logoutBtn:hover {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* --- نافذة الإعدادات (Modal) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 35px 30px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    animation: slideIn 0.3s ease-out;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 22px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    outline: none;
+}
+
+.close-modal:hover { color: var(--danger); transform: scale(1.1); }
+
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    text-align: center;
+    color: var(--primary-gold);
+    font-size: 1.6rem;
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.modal-body img {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-gold);
+    box-shadow: 0 0 20px var(--primary-gold-glow);
+    margin-bottom: 10px;
+}
+
+.info-group {
+    width: 100%;
+    background: rgba(9, 9, 11, 0.5);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.info-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.info-group p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+/* --------------------------------- */
 
 .clock-container {
     font-size: 1.8rem;
