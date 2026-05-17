@@ -113,6 +113,12 @@
     </div>
 
     <div id="appContainer" class="app-container" style="display: none;">
+        
+        <div class="islamic-reminder-card">
+            <i class="fa-solid fa-kaaba reminder-icon"></i>
+            <span id="islamicReminderText">جارِ التحميل...</span>
+        </div>
+
         <div class="header-top">
             <div class="clock-container" id="liveClock"></div>
             <div class="header-actions">
@@ -161,11 +167,8 @@
                 <p data-i18n="leaderboardSub">The top performers of the elite journey</p>
             </div>
             
-            <div class="podium-container" id="podiumContainer">
-                </div>
-
-            <div class="leaderboard-list" id="leaderboardList">
-                </div>
+            <div class="podium-container" id="podiumContainer"></div>
+            <div class="leaderboard-list" id="leaderboardList"></div>
         </div>
     </div>
 
@@ -180,22 +183,18 @@
                     <label for="avatarUpload" class="edit-pic-overlay"><i class="fa-solid fa-camera"></i></label>
                     <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
                 </div>
-                
                 <div class="info-group">
                     <label data-i18n="profileName">Name</label>
                     <input type="text" id="modalNameInput" class="modal-input" placeholder="Your Name">
                 </div>
-
                 <div class="info-group">
                     <label data-i18n="bio">Bio</label>
                     <textarea id="modalBioInput" class="modal-input" data-i18n-placeholder="bioPlaceholder" placeholder="Write something about yourself..."></textarea>
                 </div>
-
                 <div class="info-group" style="border: none; background: transparent; padding: 0;">
                     <label data-i18n="profileDate">Joined On</label>
                     <p id="modalDate" dir="ltr" style="font-size: 13px; color: var(--text-muted);">---</p>
                 </div>
-
                 <button id="saveProfileBtn" class="login-button" data-i18n="saveChanges" style="margin-top: 10px;">Save Changes</button>
             </div>
         </div>
