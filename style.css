@@ -384,3 +384,52 @@ textarea.modal-input { resize: none; height: 75px; line-height: 1.4; }
 [dir="rtl"] .lb-score { flex-direction: row-reverse; }
 
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+/* --- Islamic Reminder Banner --- */
+.islamic-reminder-card {
+    width: 100%;
+    max-width: 1400px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(9, 9, 11, 0.9));
+    border: 1px solid var(--primary-gold);
+    border-radius: 16px;
+    padding: 15px 25px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.1);
+    animation: slideIn 0.5s ease-out;
+}
+.reminder-icon {
+    font-size: 24px;
+    color: var(--primary-gold);
+    animation: pulse 2s infinite;
+    filter: drop-shadow(0 0 8px var(--primary-gold-glow));
+}
+#islamicReminderText {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+}
+
+/* --- Friday Highlight in Grid --- */
+.friday-highlight {
+    color: #10b981 !important; /* لون أخضر زمردي إسلامي فخم */
+    background: rgba(16, 185, 129, 0.1) !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.1);
+    font-weight: 800;
+}
+.friday-checkbox {
+    border-color: rgba(16, 185, 129, 0.5) !important;
+}
+.friday-checkbox:checked {
+    background-color: #10b981 !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4) !important;
+}
+
+[dir="rtl"] .islamic-reminder-card {
+    flex-direction: row;
+}
