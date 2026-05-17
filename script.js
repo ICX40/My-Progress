@@ -11,10 +11,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage(); 
+// مسحنا الـ storage عشان مش محتاجينه خلاص
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-// --- نظام الترجمة השامل ---
+// --- نظام الترجمة ---
 const i18n = {
     en: {
         appTitle: "Elite Tracker", welcomeBack: "Welcome Back", signInSub: "Sign in to continue your journey",
@@ -25,7 +25,7 @@ const i18n = {
         reqLength: "6 characters minimum", reqUpper: "Uppercase letter (A-Z)", reqLower: "Lowercase letter (a-z)",
         reqNumber: "Number (0-9)", reqSpecial: "Special character (!@#$%^&*)", signUpBtn: "Sign Up", signUpGoogle: "Continue with Google",
         mobileAlready: "Already have an account?", logout: "Logout", settings: "Account Settings", profileName: "Name", profileDate: "Joined On",
-        bio: "Bio", bioPlaceholder: "Write something about yourself...", saveChanges: "Save Changes", uploading: "Uploading image...",
+        bio: "Bio", bioPlaceholder: "Write something about yourself...", saveChanges: "Save Changes", uploading: "Processing image...", imgReady: "Image ready, click save",
         newHabit: "Enter new habit...", addHabit: "Add Habit", msgWelcomeBack: "Welcome back!", msgUserNotFound: "No account found with this email! Please create one.",
         msgWrongPass: "Incorrect password!", msgAccCreated: "Account created successfully!", msgEmailInUse: "Email already in use! Please login.",
         msgReqNotMet: "Please fulfill all password requirements (green checks) first!", msgGoogleNoAcc: "No account linked to this Google email. Please sign up first.",
@@ -42,7 +42,7 @@ const i18n = {
         reqLength: "6 أحرف على الأقل", reqUpper: "حرف إنجليزي كبير (A-Z)", reqLower: "حرف إنجليزي صغير (a-z)",
         reqNumber: "رقم (0-9)", reqSpecial: "رمز خاص (!@#$%^&*)", signUpBtn: "إنشاء الحساب", signUpGoogle: "التسجيل بواسطة Google",
         mobileAlready: "لديك حساب بالفعل؟", logout: "تسجيل الخروج", settings: "إعدادات الحساب", profileName: "الاسم", profileDate: "تاريخ الانضمام",
-        bio: "نبذة عني (Bio)", bioPlaceholder: "اكتب شيئاً عن نفسك...", saveChanges: "حفظ التعديلات", uploading: "جاري رفع الصورة...",
+        bio: "نبذة عني (Bio)", bioPlaceholder: "اكتب شيئاً عن نفسك...", saveChanges: "حفظ التعديلات", uploading: "جاري معالجة الصورة...", imgReady: "تم تجهيز الصورة، اضغط حفظ",
         newHabit: "أدخل عادة جديدة...", addHabit: "إضافة عادة", msgWelcomeBack: "مرحباً بعودتك!", msgUserNotFound: "أنت لا تمتلك حساباً مسجلاً بهذا البريد! الرجاء إنشاء حساب جديد.",
         msgWrongPass: "كلمة المرور غير صحيحة!", msgAccCreated: "تم إنشاء الحساب بنجاح!", msgEmailInUse: "عفواً، أنت تمتلك حساباً بالفعل بهذا البريد! الرجاء تسجيل الدخول.",
         msgReqNotMet: "الرجاء استيفاء جميع شروط كلمة المرور الموضحة (علامات صح خضراء) أولاً!", msgGoogleNoAcc: "لا يوجد حساب مرتبط ببريد Google هذا! الرجاء إنشاء حساب جديد أولاً.",
@@ -104,7 +104,7 @@ let currentUser = null;
 let selectedLanguage = localStorage.getItem('elite_language');
 let pendingPhotoURL = null; 
 
-// --- تطبيق الترجمة ---
+// --- Functions ---
 function applyTranslations(lang) {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
@@ -197,24 +197,50 @@ openSettingsBtn.addEventListener('click', () => { settingsModal.style.display = 
 closeModalBtn.addEventListener('click', () => { settingsModal.style.display = 'none'; });
 settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.style.display = 'none'; });
 
-// --- رفع الصورة وحفظ التعديلات ---
-document.getElementById('avatarUpload').addEventListener('change', async (e) => {
+// --- طريقة الحفظ المجانية (Base64) ---
+document.getElementById('avatarUpload').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     showToast(i18n[selectedLanguage].uploading);
     document.getElementById('modalAvatar').style.opacity = '0.5';
-    
-    const storageRef = storage.ref(`avatars/${currentUser.uid}_${Date.now()}`);
-    try {
-        const snapshot = await storageRef.put(file);
-        pendingPhotoURL = await snapshot.ref.getDownloadURL();
-        document.getElementById('modalAvatar').src = pendingPhotoURL; 
-    } catch (error) {
-        showToast(error.message, 'error');
-    } finally {
-        document.getElementById('modalAvatar').style.opacity = '1';
-    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            // ضغط الصورة عشان حجمها يقل وماتاخدش مساحة في قاعدة البيانات
+            const canvas = document.createElement('canvas');
+            const MAX_SIZE = 250;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > MAX_SIZE) {
+                    height *= MAX_SIZE / width;
+                    width = MAX_SIZE;
+                }
+            } else {
+                if (height > MAX_SIZE) {
+                    width *= MAX_SIZE / height;
+                    height = MAX_SIZE;
+                }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // تحويل الصورة لكود نصي (Base64)
+            pendingPhotoURL = canvas.toDataURL('image/jpeg', 0.7);
+            
+            document.getElementById('modalAvatar').src = pendingPhotoURL;
+            document.getElementById('modalAvatar').style.opacity = '1';
+            showToast(i18n[selectedLanguage].imgReady);
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
 });
 
 document.getElementById('saveProfileBtn').addEventListener('click', async () => {
@@ -224,6 +250,7 @@ document.getElementById('saveProfileBtn').addEventListener('click', async () => 
     
     try {
         await currentUser.updateProfile({ displayName: newName, photoURL: finalPhotoURL });
+        // حفظ كل حاجة مجاناً في الفايرستور (Firestore) العادي بتاعنا
         await db.collection('users').doc(currentUser.uid).set({
             displayName: newName,
             photoURL: finalPhotoURL,
@@ -573,7 +600,9 @@ function buildGrid(monthIndex) {
             let targetIndex = hIndex;
             if (e.clientY - offset > 0) targetIndex++;
             if (draggedIndex < targetIndex) targetIndex--;
-            if (draggedIndex !== targetIndex) reorderHabits(draggedIndex, targetIndex);
+            if (draggedIndex !== targetIndex) {
+                reorderHabits(draggedIndex, targetIndex);
+            }
             draggedIndex = null;
         });
 
