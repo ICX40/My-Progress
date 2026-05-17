@@ -116,6 +116,15 @@
         <div class="header-top">
             <div class="clock-container" id="liveClock"></div>
             <div class="header-actions">
+                
+                <button id="toggleLeaderboardBtn" class="leaderboard-btn" title="Leaderboard">
+                    <i class="fa-solid fa-trophy"></i>
+                </button>
+                <div class="points-badge">
+                    <i class="fa-solid fa-star"></i>
+                    <span id="userPointsDisplay">0</span>
+                </div>
+
                 <select class="month-selector" id="monthSelect"></select>
                 
                 <div class="user-profile-container">
@@ -143,6 +152,20 @@
         <div class="add-habit-container">
             <input type="text" class="add-habit-input" id="newHabitInput" data-i18n-placeholder="newHabit" placeholder="Enter new habit...">
             <button class="add-habit-btn" id="addHabitBtn" data-i18n="addHabit">Add Habit</button>
+        </div>
+
+        <div id="leaderboardContainer" class="leaderboard-container" style="display: none;">
+            <div class="leaderboard-header">
+                <i class="fa-solid fa-crown gold-glow"></i>
+                <h2 data-i18n="leaderboardTitle">Elite Leaderboard</h2>
+                <p data-i18n="leaderboardSub">The top performers of the elite journey</p>
+            </div>
+            
+            <div class="podium-container" id="podiumContainer">
+                </div>
+
+            <div class="leaderboard-list" id="leaderboardList">
+                </div>
         </div>
     </div>
 

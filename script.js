@@ -11,7 +11,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-// مسحنا الـ storage عشان مش محتاجينه خلاص
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
 // --- نظام الترجمة ---
@@ -31,11 +30,12 @@ const i18n = {
         msgReqNotMet: "Please fulfill all password requirements (green checks) first!", msgGoogleNoAcc: "No account linked to this Google email. Please sign up first.",
         msgGoogleSuccess: "Google sign-in successful!", msgGoogleAlready: "Account already exists! Signed in successfully.", msgLoggedOut: "Logged out securely.",
         msgHabitAdded: "Habit cultivated successfully!", msgHabitRemoved: "Habit removed", msgHabitUpdated: "Habit updated successfully!", msgProfileUpdated: "Profile updated successfully!",
+        leaderboardTitle: "Elite Leaderboard", leaderboardSub: "The top performers of the elite journey",
         monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     },
     ar: {
         appTitle: "إليت تراكر", welcomeBack: "مرحباً بعودتك", signInSub: "سجل الدخول لمتابعة رحلتك",
-        email: "البريد الإلكتروني", password: "كلمة المرور", loginBtn: "تسجيل الدخول", or: "أو", loginGoogle: "التسجيل بواسطة Google",
+        email: "البريد الإلكتروني", password: "كلمة المرور", loginBtn: "تسجيل الدخول", أو: "أو", loginGoogle: "التسجيل بواسطة Google",
         mobileCreate: "إنشاء حساب", sliderH1Unswitched: "مرحباً بك في إليت!", sliderH3Unswitched: "إذا كنت جديداً هنا، فقط قم بإنشاء حساب لتبدأ رحلتك وتحقق أهدافك!",
         sliderBtnUnswitched: "إنشاء حساب", sliderH1Switched: "لديك حساب بالفعل؟", sliderH3Switched: "سجل الدخول لمتابعة تقدمك وعاداتك اليومية!",
         sliderBtnSwitched: "تسجيل الدخول", createAcc: "إنشاء حساب", createAccSub: "انضم إلينا وابدأ التتبع",
@@ -48,6 +48,7 @@ const i18n = {
         msgReqNotMet: "الرجاء استيفاء جميع شروط كلمة المرور الموضحة (علامات صح خضراء) أولاً!", msgGoogleNoAcc: "لا يوجد حساب مرتبط ببريد Google هذا! الرجاء إنشاء حساب جديد أولاً.",
         msgGoogleSuccess: "تم تسجيل الدخول بواسطة Google بنجاح!", msgGoogleAlready: "أنت تمتلك حساباً بالفعل مرتبطاً بـ Google هذا! تم تسجيل دخولك بنجاح.", msgLoggedOut: "تم تسجيل الخروج بأمان.",
         msgHabitAdded: "تمت إضافة العادة بنجاح!", msgHabitRemoved: "تم حذف العادة", msgHabitUpdated: "تم تعديل العادة بنجاح!", msgProfileUpdated: "تم تحديث الملف الشخصي بنجاح!",
+        leaderboardTitle: "لوحة النخبة", leaderboardSub: "أفضل المنجزين في رحلة إليت",
         monthNames: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
     }
 };
@@ -83,6 +84,13 @@ const newHabitInput = document.getElementById('newHabitInput');
 const addHabitBtn = document.getElementById('addHabitBtn');
 const toastContainer = document.getElementById('toastContainer');
 
+// عناصر لوحة الصدارة الجديدة (Leaderboard DOM)
+const userPointsDisplay = document.getElementById('userPointsDisplay');
+const toggleLeaderboardBtn = document.getElementById('toggleLeaderboardBtn');
+const leaderboardContainer = document.getElementById('leaderboardContainer');
+const podiumContainer = document.getElementById('podiumContainer');
+const leaderboardList = document.getElementById('leaderboardList');
+
 let signUpButton = document.getElementById("sign-up-button");
 let signUpHolder = document.getElementById("signUpHolder");
 let signIn = document.getElementById("sign-in");
@@ -103,6 +111,7 @@ let draggedIndex = null;
 let currentUser = null;
 let selectedLanguage = localStorage.getItem('elite_language');
 let pendingPhotoURL = null; 
+let userPoints = 0; // متغير النقاط العام
 
 // --- Functions ---
 function applyTranslations(lang) {
@@ -197,7 +206,26 @@ openSettingsBtn.addEventListener('click', () => { settingsModal.style.display = 
 closeModalBtn.addEventListener('click', () => { settingsModal.style.display = 'none'; });
 settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.style.display = 'none'; });
 
-// --- طريقة الحفظ المجانية (Base64) ---
+// التبديل بين الليدربورد والصفحة الرئيسية للتتبع
+toggleLeaderboardBtn.addEventListener('click', () => {
+    const isShowing = leaderboardContainer.style.display === 'block';
+    if (isShowing) {
+        leaderboardContainer.style.display = 'none';
+        document.querySelector('.tracker-container').style.display = 'block';
+        document.querySelector('.add-habit-container').style.display = 'flex';
+        currentDateDisplay.style.display = 'block';
+        toggleLeaderboardBtn.classList.remove('active');
+    } else {
+        leaderboardContainer.style.display = 'block';
+        document.querySelector('.tracker-container').style.display = 'none';
+        document.querySelector('.add-habit-container').style.display = 'none';
+        currentDateDisplay.style.display = 'none';
+        toggleLeaderboardBtn.classList.add('active');
+        fetchLeaderboard();
+    }
+});
+
+// Base64 Profile Image Compressor
 document.getElementById('avatarUpload').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -209,7 +237,6 @@ document.getElementById('avatarUpload').addEventListener('change', (e) => {
     reader.onload = function(event) {
         const img = new Image();
         img.onload = function() {
-            // ضغط الصورة عشان حجمها يقل وماتاخدش مساحة في قاعدة البيانات
             const canvas = document.createElement('canvas');
             const MAX_SIZE = 250;
             let width = img.width;
@@ -231,7 +258,6 @@ document.getElementById('avatarUpload').addEventListener('change', (e) => {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            // تحويل الصورة لكود نصي (Base64)
             pendingPhotoURL = canvas.toDataURL('image/jpeg', 0.7);
             
             document.getElementById('modalAvatar').src = pendingPhotoURL;
@@ -250,7 +276,6 @@ document.getElementById('saveProfileBtn').addEventListener('click', async () => 
     
     try {
         await currentUser.updateProfile({ displayName: newName, photoURL: finalPhotoURL });
-        // حفظ كل حاجة مجاناً في الفايرستور (Firestore) العادي بتاعنا
         await db.collection('users').doc(currentUser.uid).set({
             displayName: newName,
             photoURL: finalPhotoURL,
@@ -331,6 +356,7 @@ auth.onAuthStateChanged(user => {
         habits = [];
         state = {};
         pendingPhotoURL = null;
+        userPoints = 0;
         languageContainer.style.display = 'flex';
         authContainer.style.display = 'none';
         appContainer.style.display = 'none';
@@ -423,10 +449,13 @@ function loadUserData() {
             if(data.displayName) finalName = data.displayName;
             if(data.photoURL) finalPhoto = data.photoURL;
             if(data.bio) finalBio = data.bio;
+            userPoints = data.points || 0; // تحميل النقاط
         } else {
             habits = []; state = {};
+            userPoints = 0;
         }
         
+        if (userPointsDisplay) userPointsDisplay.textContent = userPoints;
         document.getElementById('userAvatar').src = finalPhoto;
         document.getElementById('userNameDisplay').textContent = finalName;
         document.getElementById('modalAvatar').src = finalPhoto;
@@ -447,7 +476,11 @@ function loadUserData() {
 
 function saveUserData() {
     if (!currentUser) return;
-    db.collection('users').doc(currentUser.uid).set({ habits: habits, state: JSON.stringify(state) }, { merge: true }).catch(error => console.log(error));
+    db.collection('users').doc(currentUser.uid).set({ 
+        habits: habits, 
+        state: JSON.stringify(state),
+        points: userPoints // حفظ النقاط الحالية
+    }, { merge: true }).catch(error => console.log(error));
 }
 
 function showToast(message, type = 'success') {
@@ -668,8 +701,17 @@ function buildGrid(monthIndex) {
             const isToday = monthIndex === currentRealMonth && dayNum === currentRealDay;
             if (!isToday) checkbox.disabled = true;
 
+            // احتساب النقاط وإضافتها حياً (10 نقاط لكل علامة اختيار)
             checkbox.addEventListener('change', (e) => {
                 state[monthIndex][d][hIndex] = e.target.checked;
+                
+                if (e.target.checked) {
+                    userPoints += 10;
+                } else {
+                    userPoints = Math.max(0, userPoints - 10);
+                }
+                if (userPointsDisplay) userPointsDisplay.textContent = userPoints;
+
                 updateAllProgress(monthIndex, daysInMonth, statusElements, habitFills, habitTexts);
                 saveUserData();
             });
@@ -762,3 +804,77 @@ newHabitInput.addEventListener('keypress', (e) => {
 monthSelect.addEventListener('change', function(e) {
     buildGrid(e.target.value);
 });
+
+// دالة جلب وعرض المتصدرين لبناء الـ Leaderboard الفخم
+async function fetchLeaderboard() {
+    podiumContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; width: 100%; padding: 20px;"><i class="fa-solid fa-spinner fa-spin" style="color: var(--primary-gold); font-size: 30px;"></i></div>';
+    leaderboardList.innerHTML = '';
+
+    try {
+        const snapshot = await db.collection('users').orderBy('points', 'desc').limit(20).get();
+        const users = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.points && data.points > 0) {
+                users.push({
+                    name: data.displayName || 'Elite User',
+                    photo: data.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.displayName || 'Elite')}&background=d4af37&color=000&bold=true`,
+                    points: data.points
+                });
+            }
+        });
+
+        podiumContainer.innerHTML = '';
+        
+        if (users.length === 0) {
+            podiumContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; width: 100%; padding: 20px;">No elite members yet. Be the first!</p>';
+            return;
+        }
+
+        // توزيع المنصة بالترتيب البصري: الثاني (يسار)، الأول (منتصف)، الثالث (يمين)
+        const podiumUsers = [null, null, null]; 
+        if (users[1]) podiumUsers[0] = { ...users[1], rank: 2 };
+        if (users[0]) podiumUsers[1] = { ...users[0], rank: 1 };
+        if (users[2]) podiumUsers[2] = { ...users[2], rank: 3 };
+
+        podiumUsers.forEach(u => {
+            if (!u) {
+                const emptySpot = document.createElement('div');
+                emptySpot.className = 'podium-spot empty';
+                podiumContainer.appendChild(emptySpot);
+                return;
+            }
+            const spot = document.createElement('div');
+            spot.className = `podium-spot rank-${u.rank}`;
+            spot.innerHTML = `
+                <img src="${u.photo}" class="podium-avatar" alt="${u.name}">
+                <div class="podium-step">
+                    ${u.rank}
+                </div>
+                <div class="podium-name">${u.name}</div>
+                <div class="podium-points"><i class="fa-solid fa-star"></i> ${u.points}</div>
+            `;
+            podiumContainer.appendChild(spot);
+        });
+
+        // بقية الترتيب من المركز الـ 4 فما فوق
+        for (let i = 3; i < users.length; i++) {
+            const u = users[i];
+            const row = document.createElement('div');
+            row.className = 'lb-row';
+            row.innerHTML = `
+                <div class="lb-user-info">
+                    <div class="lb-rank">#${i + 1}</div>
+                    <img src="${u.photo}" class="lb-avatar" alt="${u.name}">
+                    <div class="lb-name">${u.name}</div>
+                </div>
+                <div class="lb-score"><i class="fa-solid fa-star"></i> ${u.points}</div>
+            `;
+            leaderboardList.appendChild(row);
+        }
+
+    } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+        podiumContainer.innerHTML = '<p style="color: var(--danger); text-align: center; width: 100%;">Error loading leaderboard</p>';
+    }
+}
