@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Habit Tracker</title>
+    <title>Elite Islamic Tracker</title>
     <link rel="stylesheet" href="style.css">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090b">
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
     <script src="https://kit.fontawesome.com/3b31cb99f3.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
 </head>
@@ -116,16 +121,21 @@
         
         <div class="islamic-reminder-card">
             <i class="fa-solid fa-kaaba reminder-icon"></i>
-            <span id="islamicReminderText">جارِ التحميل...</span>
+            <span id="islamicReminderText">جارِ حساب التوقيت...</span>
         </div>
 
         <div class="header-top">
             <div class="clock-container" id="liveClock"></div>
             <div class="header-actions">
                 
+                <button id="installAppBtn" class="leaderboard-btn" style="display: none;" title="Install App">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+
                 <button id="toggleLeaderboardBtn" class="leaderboard-btn" title="Leaderboard">
                     <i class="fa-solid fa-trophy"></i>
                 </button>
+
                 <div class="points-badge">
                     <i class="fa-solid fa-star"></i>
                     <span id="userPointsDisplay">0</span>
@@ -183,18 +193,22 @@
                     <label for="avatarUpload" class="edit-pic-overlay"><i class="fa-solid fa-camera"></i></label>
                     <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
                 </div>
+                
                 <div class="info-group">
                     <label data-i18n="profileName">Name</label>
                     <input type="text" id="modalNameInput" class="modal-input" placeholder="Your Name">
                 </div>
+
                 <div class="info-group">
                     <label data-i18n="bio">Bio</label>
                     <textarea id="modalBioInput" class="modal-input" data-i18n-placeholder="bioPlaceholder" placeholder="Write something about yourself..."></textarea>
                 </div>
+
                 <div class="info-group" style="border: none; background: transparent; padding: 0;">
                     <label data-i18n="profileDate">Joined On</label>
                     <p id="modalDate" dir="ltr" style="font-size: 13px; color: var(--text-muted);">---</p>
                 </div>
+
                 <button id="saveProfileBtn" class="login-button" data-i18n="saveChanges" style="margin-top: 10px;">Save Changes</button>
             </div>
         </div>
