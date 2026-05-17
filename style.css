@@ -172,14 +172,9 @@ body {
 .google-icon {
     width: 22px;
     height: 22px;
-    object-fit: contain; /* عشان الصورة تحافظ على جودتها وأبعادها */
+    object-fit: contain;
 }
-.google-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px; /* المسافة بين اللوجو والكلمة */
-}
+
 .divider {
     width: 100%;
     display: flex;
@@ -419,7 +414,7 @@ body {
 }
 
 .habit-name {
-    width: 220px;
+    width: 250px;
     font-weight: 500;
     color: var(--text-main);
     flex-shrink: 0;
@@ -449,20 +444,71 @@ body {
     color: var(--text-main);
 }
 
-.delete-btn {
+/* --- أزرار التحكم الجديدة (تعديل وحذف) مع الخلفية الشفافة --- */
+.action-btns {
+    display: flex;
+    gap: 10px;
+    margin-right: 15px;
+    align-items: center;
+}
+
+.edit-btn, .delete-btn {
+    background: rgba(255, 255, 255, 0.03); 
+    border: 1px solid rgba(255, 255, 255, 0.05); 
     color: var(--text-muted);
     cursor: pointer;
-    margin-right: 12px;
-    font-size: 16px;
-    background: none;
-    border: none;
-    padding: 0;
-    transition: all 0.2s ease;
+    font-size: 14px;
+    width: 32px; 
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.edit-btn:hover {
+    color: var(--bg-main);
+    background: var(--primary-gold);
+    border-color: var(--primary-gold);
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px var(--primary-gold-glow);
 }
 
 .delete-btn:hover {
-    color: var(--danger);
-    transform: scale(1.2);
+    color: #fff;
+    background: var(--danger);
+    border-color: var(--danger);
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* مربع الكتابة الذي يظهر عند التعديل (إصلاح اللون الأبيض) */
+.edit-input {
+    background-color: var(--bg-main) !important; 
+    border: 1px solid var(--primary-gold) !important;
+    color: var(--primary-gold) !important; 
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 8px;
+    outline: none;
+    width: 150px;
+    box-shadow: 0 0 10px var(--primary-gold-glow);
+}
+
+.habit-text-span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+    transition: color 0.3s ease;
+}
+
+.row:hover .habit-text-span {
+    color: #fff;
 }
 
 .dragging {

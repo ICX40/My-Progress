@@ -395,12 +395,10 @@ function buildGrid(monthIndex) {
         const actionBtns = document.createElement('div');
         actionBtns.className = 'action-btns';
 
-        // زر التعديل بأيقونة FontAwesome
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
         editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
         
-        // زر الحذف بأيقونة FontAwesome
         const delBtn = document.createElement('button');
         delBtn.className = 'delete-btn';
         delBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
