@@ -11,7 +11,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// Providers
 const googleProvider = new firebase.auth.GoogleAuthProvider();
+const facebookProvider = new firebase.auth.FacebookAuthProvider();
 
 // DOM Elements
 const authContainer = document.getElementById('authContainer');
@@ -26,6 +29,8 @@ const loginBtn = document.getElementById('loginBtn');
 const registerBtn = document.getElementById('registerBtn');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
 const googleSignUpBtn = document.getElementById('googleSignUpBtn');
+const facebookLoginBtn = document.getElementById('facebookLoginBtn');
+const facebookSignUpBtn = document.getElementById('facebookSignUpBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 
 const liveClock = document.getElementById('liveClock');
@@ -74,6 +79,7 @@ auth.onAuthStateChanged(user => {
     }
 });
 
+// Email/Password Login
 loginBtn.addEventListener('click', () => {
     const email = loginEmailInput.value;
     const password = loginPasswordInput.value;
@@ -90,6 +96,7 @@ loginBtn.addEventListener('click', () => {
         });
 });
 
+// Email/Password Signup
 registerBtn.addEventListener('click', () => {
     const email = signUpEmailInput.value;
     const password = signUpPasswordInput.value;
@@ -104,6 +111,7 @@ registerBtn.addEventListener('click', () => {
         });
 });
 
+// Google Login
 googleLoginBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
         .then((result) => {
@@ -119,6 +127,7 @@ googleLoginBtn.addEventListener('click', () => {
         .catch((error) => showToast(error.message, 'error'));
 });
 
+// Google Signup
 googleSignUpBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
         .then((result) => {
@@ -129,6 +138,47 @@ googleSignUpBtn.addEventListener('click', () => {
             }
         })
         .catch((error) => showToast(error.message, 'error'));
+});
+
+// Facebook Login
+facebookLoginBtn.addEventListener('click', () => {
+    auth.signInWithPopup(facebookProvider)
+        .then((result) => {
+            if (result.additionalUserInfo.isNewUser) {
+                result.user.delete().then(() => {
+                    auth.signOut();
+                    showToast("لا يوجد حساب مرتبط بـ Facebook هذا! الرجاء إنشاء حساب جديد أولاً.", 'error');
+                });
+            } else {
+                showToast('Facebook sign-in successful!');
+            }
+        })
+        .catch((error) => {
+            if(error.code === 'auth/account-exists-with-different-credential') {
+                showToast("هذا البريد مسجل بالفعل بطريقة أخرى (مثل Google أو إيميل عادي). الرجاء تسجيل الدخول بتلك الطريقة.", 'error');
+            } else {
+                showToast(error.message, 'error');
+            }
+        });
+});
+
+// Facebook Signup
+facebookSignUpBtn.addEventListener('click', () => {
+    auth.signInWithPopup(facebookProvider)
+        .then((result) => {
+            if (!result.additionalUserInfo.isNewUser) {
+                showToast("أنت تمتلك حساباً بالفعل مرتبطاً بـ Facebook هذا! تم تسجيل دخولك بنجاح.");
+            } else {
+                showToast('Account created successfully with Facebook!');
+            }
+        })
+        .catch((error) => {
+            if(error.code === 'auth/account-exists-with-different-credential') {
+                showToast("هذا البريد مسجل بالفعل بطريقة أخرى (مثل Google أو إيميل عادي). الرجاء تسجيل الدخول بتلك الطريقة.", 'error');
+            } else {
+                showToast(error.message, 'error');
+            }
+        });
 });
 
 logoutBtn.addEventListener('click', () => {
@@ -391,7 +441,7 @@ function buildGrid(monthIndex) {
             draggedIndex = null;
         });
 
-        // --- الحاوية الخاصة بأزرار التحكم (التعديل والحذف) ---
+        // أزرار التحكم
         const actionBtns = document.createElement('div');
         actionBtns.className = 'action-btns';
 
@@ -408,7 +458,7 @@ function buildGrid(monthIndex) {
         nameSpan.className = 'habit-text-span';
         nameSpan.textContent = habit;
 
-        // وظيفة التعديل المدمج
+        // التعديل المدمج
         editBtn.onclick = () => {
             if (nameDiv.querySelector('.edit-input')) return;
 
