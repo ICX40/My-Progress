@@ -82,9 +82,9 @@ loginBtn.addEventListener('click', () => {
         .then(() => showToast('Welcome back!'))
         .catch(error => {
             if (error.code === 'auth/user-not-found') {
-                alert("أنت لا تمتلك حساباً مسجلاً بهذا البريد! الرجاء إنشاء حساب جديد.");
+                showToast("أنت لا تمتلك حساباً مسجلاً بهذا البريد! الرجاء إنشاء حساب جديد.", 'error');
             } else if (error.code === 'auth/wrong-password') {
-                alert("كلمة المرور غير صحيحة!");
+                showToast("كلمة المرور غير صحيحة!", 'error');
             } else {
                 showToast(error.message, 'error');
             }
@@ -99,7 +99,7 @@ registerBtn.addEventListener('click', () => {
         .then(() => showToast('Account created successfully!'))
         .catch(error => {
             if (error.code === 'auth/email-already-in-use') {
-                alert("عفواً، أنت تمتلك حساباً بالفعل بهذا البريد! الرجاء تسجيل الدخول.");
+                showToast("عفواً، أنت تمتلك حساباً بالفعل بهذا البريد! الرجاء تسجيل الدخول.", 'error');
             } else {
                 showToast(error.message, 'error');
             }
@@ -110,12 +110,11 @@ registerBtn.addEventListener('click', () => {
 googleLoginBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
         .then((result) => {
-            // isNewUser تعني أن Firebase قام بإنشاء حساب جديد له للتو
             if (result.additionalUserInfo.isNewUser) {
                 // نحذف الحساب الوهمي الذي تم إنشاؤه ونوجهه للتسجيل
                 result.user.delete().then(() => {
                     auth.signOut();
-                    alert("لا يوجد حساب مرتبط ببريد Google هذا! الرجاء الذهاب لإنشاء حساب جديد أولاً.");
+                    showToast("لا يوجد حساب مرتبط ببريد Google هذا! الرجاء إنشاء حساب جديد أولاً.", 'error');
                 });
             } else {
                 showToast('Google sign-in successful!');
@@ -128,9 +127,8 @@ googleLoginBtn.addEventListener('click', () => {
 googleSignUpBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
         .then((result) => {
-            // إذا لم يكن مستخدم جديد، معناه انه سجل من قبل
             if (!result.additionalUserInfo.isNewUser) {
-                alert("أنت تمتلك حساباً بالفعل مرتبطاً بـ Google هذا! تم تسجيل دخولك بنجاح.");
+                showToast("أنت تمتلك حساباً بالفعل مرتبطاً بـ Google هذا! تم تسجيل دخولك بنجاح.");
             } else {
                 showToast('Account created successfully with Google!');
             }
