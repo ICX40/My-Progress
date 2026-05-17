@@ -74,7 +74,6 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// 1. تسجيل الدخول بالايميل
 loginBtn.addEventListener('click', () => {
     const email = loginEmailInput.value;
     const password = loginPasswordInput.value;
@@ -91,7 +90,6 @@ loginBtn.addEventListener('click', () => {
         });
 });
 
-// 2. إنشاء حساب بالايميل
 registerBtn.addEventListener('click', () => {
     const email = signUpEmailInput.value;
     const password = signUpPasswordInput.value;
@@ -106,12 +104,10 @@ registerBtn.addEventListener('click', () => {
         });
 });
 
-// 3. تسجيل الدخول بواسطة جوجل (التحقق من عدم وجود حساب)
 googleLoginBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
         .then((result) => {
             if (result.additionalUserInfo.isNewUser) {
-                // نحذف الحساب الوهمي الذي تم إنشاؤه ونوجهه للتسجيل
                 result.user.delete().then(() => {
                     auth.signOut();
                     showToast("لا يوجد حساب مرتبط ببريد Google هذا! الرجاء إنشاء حساب جديد أولاً.", 'error');
@@ -123,7 +119,6 @@ googleLoginBtn.addEventListener('click', () => {
         .catch((error) => showToast(error.message, 'error'));
 });
 
-// 4. إنشاء حساب بواسطة جوجل (التحقق من أن الحساب موجود بالفعل)
 googleSignUpBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
         .then((result) => {
@@ -136,7 +131,6 @@ googleSignUpBtn.addEventListener('click', () => {
         .catch((error) => showToast(error.message, 'error'));
 });
 
-// تسجيل الخروج
 logoutBtn.addEventListener('click', () => {
     auth.signOut().then(() => showToast('Logged out securely.'));
 });
@@ -397,64 +391,62 @@ function buildGrid(monthIndex) {
             draggedIndex = null;
         });
 
-        // --- زر الحذف ---
-        const delBtn = document.createElement('button');
-        delBtn.className = 'delete-btn';
-        delBtn.innerHTML = '⨉';
-        delBtn.onclick = () => deleteHabit(hIndex);
-        
-        // --- زر التعديل (الجديد) ---
+        // --- الحاوية الخاصة بأزرار التحكم (التعديل والحذف) ---
+        const actionBtns = document.createElement('div');
+        actionBtns.className = 'action-btns';
+
+        // زر التعديل بأيقونة FontAwesome
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
-        editBtn.innerHTML = '✎'; // أيقونة القلم
+        editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
         
-        // --- نص المهمة ---
+        // زر الحذف بأيقونة FontAwesome
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
+        delBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+        delBtn.onclick = () => deleteHabit(hIndex);
+
         const nameSpan = document.createElement('span');
+        nameSpan.className = 'habit-text-span';
         nameSpan.textContent = habit;
 
         // وظيفة التعديل المدمج
         editBtn.onclick = () => {
-            // منع فتح أكثر من مربع تعديل لنفس المهمة
             if (nameDiv.querySelector('.edit-input')) return;
 
             const currentText = nameSpan.textContent;
             
-            // إنشاء مربع إدخال جديد
             const input = document.createElement('input');
             input.type = 'text';
             input.value = currentText;
             input.className = 'edit-input';
 
-            // استبدال النص بمربع الإدخال
             nameDiv.replaceChild(input, nameSpan);
-            input.focus(); // وضع المؤشر بداخل المربع تلقائياً
+            input.focus();
 
-            // دالة حفظ التعديلات
             const saveChanges = () => {
                 const newText = input.value.trim();
                 if (newText && newText !== currentText) {
                     habits[hIndex] = newText;
                     saveUserData();
-                    showToast('تم تعديل المهمة بنجاح!');
+                    showToast('Habit updated successfully!');
                 }
-                buildGrid(monthSelect.value); // إعادة رسم الشبكة لحفظ الشكل
+                buildGrid(monthSelect.value); 
             };
 
-            // الحفظ عند الضغط خارج المربع
             input.addEventListener('blur', saveChanges);
-            
-            // الحفظ عند الضغط على Enter
             input.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    input.blur(); // سيقوم بتشغيل دالة الحفظ الموجودة في الـ blur
+                    input.blur(); 
                 }
             });
         };
 
-        // ترتيب العناصر بداخل مساحة الاسم
+        actionBtns.appendChild(editBtn);
+        actionBtns.appendChild(delBtn);
+
         nameDiv.appendChild(dragHandle);
-        nameDiv.appendChild(editBtn); // إضافة زر التعديل
-        nameDiv.appendChild(delBtn);
+        nameDiv.appendChild(actionBtns);
         nameDiv.appendChild(nameSpan);
         row.appendChild(nameDiv);
 
