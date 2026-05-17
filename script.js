@@ -397,15 +397,63 @@ function buildGrid(monthIndex) {
             draggedIndex = null;
         });
 
+        // --- زر الحذف ---
         const delBtn = document.createElement('button');
         delBtn.className = 'delete-btn';
         delBtn.innerHTML = '⨉';
         delBtn.onclick = () => deleteHabit(hIndex);
         
+        // --- زر التعديل (الجديد) ---
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.innerHTML = '✎'; // أيقونة القلم
+        
+        // --- نص المهمة ---
         const nameSpan = document.createElement('span');
         nameSpan.textContent = habit;
 
+        // وظيفة التعديل المدمج
+        editBtn.onclick = () => {
+            // منع فتح أكثر من مربع تعديل لنفس المهمة
+            if (nameDiv.querySelector('.edit-input')) return;
+
+            const currentText = nameSpan.textContent;
+            
+            // إنشاء مربع إدخال جديد
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentText;
+            input.className = 'edit-input';
+
+            // استبدال النص بمربع الإدخال
+            nameDiv.replaceChild(input, nameSpan);
+            input.focus(); // وضع المؤشر بداخل المربع تلقائياً
+
+            // دالة حفظ التعديلات
+            const saveChanges = () => {
+                const newText = input.value.trim();
+                if (newText && newText !== currentText) {
+                    habits[hIndex] = newText;
+                    saveUserData();
+                    showToast('تم تعديل المهمة بنجاح!');
+                }
+                buildGrid(monthSelect.value); // إعادة رسم الشبكة لحفظ الشكل
+            };
+
+            // الحفظ عند الضغط خارج المربع
+            input.addEventListener('blur', saveChanges);
+            
+            // الحفظ عند الضغط على Enter
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    input.blur(); // سيقوم بتشغيل دالة الحفظ الموجودة في الـ blur
+                }
+            });
+        };
+
+        // ترتيب العناصر بداخل مساحة الاسم
         nameDiv.appendChild(dragHandle);
+        nameDiv.appendChild(editBtn); // إضافة زر التعديل
         nameDiv.appendChild(delBtn);
         nameDiv.appendChild(nameSpan);
         row.appendChild(nameDiv);
