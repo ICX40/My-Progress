@@ -11,14 +11,107 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-
-// Providers
 const googleProvider = new firebase.auth.GoogleAuthProvider();
-const facebookProvider = new firebase.auth.FacebookAuthProvider();
+
+// --- نظام الترجمة الشامل (Dictionary) ---
+const i18n = {
+    en: {
+        appTitle: "Elite Tracker",
+        welcomeBack: "Welcome Back",
+        signInSub: "Sign in to continue your journey",
+        email: "Email Address",
+        password: "Password",
+        loginBtn: "Login",
+        or: "OR",
+        loginGoogle: "Login with Google",
+        mobileCreate: "Create Account",
+        sliderH1Unswitched: "Welcome To Elite!",
+        sliderH3Unswitched: "If you are new here and don't know where to start, just sign up to start your journey!",
+        sliderBtnUnswitched: "Create Account",
+        sliderH1Switched: "Already have an account?",
+        sliderH3Switched: "Sign-in to continue tracking your progress!",
+        sliderBtnSwitched: "Sign In",
+        createAcc: "Create Account",
+        createAccSub: "Join us and start tracking",
+        reqLength: "6 characters minimum",
+        reqUpper: "Uppercase letter (A-Z)",
+        reqLower: "Lowercase letter (a-z)",
+        reqNumber: "Number (0-9)",
+        reqSpecial: "Special character (!@#$%^&*)",
+        signUpBtn: "Sign Up",
+        signUpGoogle: "Sign up with Google",
+        mobileAlready: "Already have an account?",
+        logout: "Logout",
+        newHabit: "Enter new habit...",
+        addHabit: "Add Habit",
+        msgWelcomeBack: "Welcome back!",
+        msgUserNotFound: "No account found with this email! Please create one.",
+        msgWrongPass: "Incorrect password!",
+        msgAccCreated: "Account created successfully!",
+        msgEmailInUse: "Email already in use! Please login.",
+        msgReqNotMet: "Please fulfill all password requirements (green checks) first!",
+        msgGoogleNoAcc: "No account linked to this Google email. Please sign up first.",
+        msgGoogleSuccess: "Google sign-in successful!",
+        msgGoogleAlready: "Account already exists! Signed in successfully.",
+        msgLoggedOut: "Logged out securely.",
+        msgHabitAdded: "Habit cultivated successfully!",
+        msgHabitRemoved: "Habit removed",
+        msgHabitUpdated: "Habit updated successfully!",
+        monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    },
+    ar: {
+        appTitle: "إليت تراكر",
+        welcomeBack: "مرحباً بعودتك",
+        signInSub: "سجل الدخول لمتابعة رحلتك",
+        email: "البريد الإلكتروني",
+        password: "كلمة المرور",
+        loginBtn: "تسجيل الدخول",
+        or: "أو",
+        loginGoogle: "تسجيل الدخول بـ Google",
+        mobileCreate: "إنشاء حساب",
+        sliderH1Unswitched: "مرحباً بك في إليت!",
+        sliderH3Unswitched: "إذا كنت جديداً هنا، فقط قم بإنشاء حساب لتبدأ رحلتك وتحقق أهدافك!",
+        sliderBtnUnswitched: "إنشاء حساب",
+        sliderH1Switched: "لديك حساب بالفعل؟",
+        sliderH3Switched: "سجل الدخول لمتابعة تقدمك وعاداتك اليومية!",
+        sliderBtnSwitched: "تسجيل الدخول",
+        createAcc: "إنشاء حساب",
+        createAccSub: "انضم إلينا وابدأ التتبع",
+        reqLength: "6 أحرف على الأقل",
+        reqUpper: "حرف إنجليزي كبير (A-Z)",
+        reqLower: "حرف إنجليزي صغير (a-z)",
+        reqNumber: "رقم (0-9)",
+        reqSpecial: "رمز خاص (!@#$%^&*)",
+        signUpBtn: "إنشاء الحساب",
+        signUpGoogle: "التسجيل بواسطة Google",
+        mobileAlready: "لديك حساب بالفعل؟",
+        logout: "تسجيل الخروج",
+        newHabit: "أدخل عادة جديدة...",
+        addHabit: "إضافة عادة",
+        msgWelcomeBack: "مرحباً بعودتك!",
+        msgUserNotFound: "أنت لا تمتلك حساباً مسجلاً بهذا البريد! الرجاء إنشاء حساب جديد.",
+        msgWrongPass: "كلمة المرور غير صحيحة!",
+        msgAccCreated: "تم إنشاء الحساب بنجاح!",
+        msgEmailInUse: "عفواً، أنت تمتلك حساباً بالفعل بهذا البريد! الرجاء تسجيل الدخول.",
+        msgReqNotMet: "الرجاء استيفاء جميع شروط كلمة المرور الموضحة (علامات صح خضراء) أولاً!",
+        msgGoogleNoAcc: "لا يوجد حساب مرتبط ببريد Google هذا! الرجاء إنشاء حساب جديد أولاً.",
+        msgGoogleSuccess: "تم تسجيل الدخول بواسطة Google بنجاح!",
+        msgGoogleAlready: "أنت تمتلك حساباً بالفعل مرتبطاً بـ Google هذا! تم تسجيل دخولك بنجاح.",
+        msgLoggedOut: "تم تسجيل الخروج بأمان.",
+        msgHabitAdded: "تمت إضافة العادة بنجاح!",
+        msgHabitRemoved: "تم حذف العادة",
+        msgHabitUpdated: "تم تعديل العادة بنجاح!",
+        monthNames: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
+    }
+};
 
 // DOM Elements
+const languageContainer = document.getElementById('languageContainer');
 const authContainer = document.getElementById('authContainer');
 const appContainer = document.getElementById('appContainer');
+
+const btnLangEn = document.getElementById('btnLangEn');
+const btnLangAr = document.getElementById('btnLangAr');
 
 const loginEmailInput = document.getElementById('loginEmailInput');
 const loginPasswordInput = document.getElementById('loginPasswordInput');
@@ -29,8 +122,6 @@ const loginBtn = document.getElementById('loginBtn');
 const registerBtn = document.getElementById('registerBtn');
 const googleLoginBtn = document.getElementById('googleLoginBtn');
 const googleSignUpBtn = document.getElementById('googleSignUpBtn');
-const facebookLoginBtn = document.getElementById('facebookLoginBtn');
-const facebookSignUpBtn = document.getElementById('facebookSignUpBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 
 const liveClock = document.getElementById('liveClock');
@@ -41,7 +132,6 @@ const newHabitInput = document.getElementById('newHabitInput');
 const addHabitBtn = document.getElementById('addHabitBtn');
 const toastContainer = document.getElementById('toastContainer');
 
-// Slider Elements
 let signUpButton = document.getElementById("sign-up-button");
 let signUpHolder = document.querySelector(".sign-up-holder");
 let signIn = document.getElementById("sign-in");
@@ -51,7 +141,6 @@ let holderH3 = document.getElementById("holder-h3");
 let mobileSignUp = document.getElementById("mobile-sign-up");
 let mobileSignIn = document.getElementById("mobile-sign-in");
 
-const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const currentDate = new Date();
 const currentYear = currentDate.getFullYear();
 const currentRealMonth = currentDate.getMonth();
@@ -61,149 +150,211 @@ let habits = [];
 let state = {};
 let draggedIndex = null;
 let currentUser = null;
+let selectedLanguage = 'en';
 
-// --- نظام تسجيل الدخول والتحقق ---
+function applyTranslations(lang) {
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if(i18n[lang][key]) el.innerHTML = i18n[lang][key];
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if(i18n[lang][key]) el.placeholder = i18n[lang][key];
+    });
+
+    updateSliderText();
+    buildMonthSelector();
+    if (currentUser) buildGrid(monthSelect.value || currentRealMonth);
+}
+
+function updateSliderText() {
+    if (signUpHolder.classList.contains("switched")) {
+        holderH1.innerHTML = i18n[selectedLanguage].sliderH1Switched;
+        holderH3.innerHTML = i18n[selectedLanguage].sliderH3Switched;
+        signUpButton.innerHTML = i18n[selectedLanguage].sliderBtnSwitched;
+    } else {
+        holderH1.innerHTML = i18n[selectedLanguage].sliderH1Unswitched;
+        holderH3.innerHTML = i18n[selectedLanguage].sliderH3Unswitched;
+        signUpButton.innerHTML = i18n[selectedLanguage].sliderBtnUnswitched;
+    }
+}
+
+function buildMonthSelector() {
+    const mNames = i18n[selectedLanguage].monthNames;
+    const currentVal = monthSelect.value;
+    monthSelect.innerHTML = '';
+    mNames.forEach((month, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = month;
+        if (index == (currentVal !== "" ? currentVal : currentRealMonth)) option.selected = true;
+        monthSelect.appendChild(option);
+    });
+}
+
+btnLangEn.addEventListener('click', () => {
+    localStorage.setItem('elite_language', 'en');
+    selectedLanguage = 'en';
+    applyTranslations('en');
+    languageContainer.style.display = 'none';
+    authContainer.style.display = 'flex';
+});
+
+btnLangAr.addEventListener('click', () => {
+    localStorage.setItem('elite_language', 'ar');
+    selectedLanguage = 'ar';
+    applyTranslations('ar');
+    languageContainer.style.display = 'none';
+    authContainer.style.display = 'flex';
+});
+
+document.querySelectorAll('.toggle-password').forEach(icon => {
+    icon.addEventListener('click', function() {
+        const input = this.previousElementSibling;
+        if (input.type === 'password') {
+            input.type = 'text';
+            this.classList.remove('fa-eye-slash');
+            this.classList.add('fa-eye');
+        } else {
+            input.type = 'password';
+            this.classList.remove('fa-eye');
+            this.classList.add('fa-eye-slash');
+        }
+    });
+});
+
+const reqLength = document.getElementById('req-length');
+const reqUpper = document.getElementById('req-upper');
+const reqLower = document.getElementById('req-lower');
+const reqNumber = document.getElementById('req-number');
+const reqSpecial = document.getElementById('req-special');
+let isPasswordValid = false;
+
+function updateReqUI(element, isValid) {
+    const icon = element.querySelector('i');
+    if (isValid) {
+        icon.className = 'fa-solid fa-check req-valid';
+        element.classList.add('valid-text');
+    } else {
+        icon.className = 'fa-solid fa-xmark req-invalid';
+        element.classList.remove('valid-text');
+    }
+}
+
+signUpPasswordInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    const validLength = val.length >= 6;
+    const validUpper = /[A-Z]/.test(val);
+    const validLower = /[a-z]/.test(val);
+    const validNumber = /[0-9]/.test(val);
+    const validSpecial = /[^A-Za-z0-9]/.test(val);
+
+    updateReqUI(reqLength, validLength);
+    updateReqUI(reqUpper, validUpper);
+    updateReqUI(reqLower, validLower);
+    updateReqUI(reqNumber, validNumber);
+    updateReqUI(reqSpecial, validSpecial);
+
+    isPasswordValid = validLength && validUpper && validLower && validNumber && validSpecial;
+});
 
 auth.onAuthStateChanged(user => {
     if (user) {
         currentUser = user;
+        selectedLanguage = localStorage.getItem('elite_language') || 'en';
+        applyTranslations(selectedLanguage);
+        
+        languageContainer.style.display = 'none';
         authContainer.style.display = 'none';
         appContainer.style.display = 'flex';
         loadUserData();
     } else {
         currentUser = null;
-        authContainer.style.display = 'flex';
-        appContainer.style.display = 'none';
         habits = [];
         state = {};
+        languageContainer.style.display = 'flex';
+        authContainer.style.display = 'none';
+        appContainer.style.display = 'none';
     }
 });
 
-// Email/Password Login
 loginBtn.addEventListener('click', () => {
     const email = loginEmailInput.value;
     const password = loginPasswordInput.value;
     auth.signInWithEmailAndPassword(email, password)
-        .then(() => showToast('Welcome back!'))
+        .then(() => showToast(i18n[selectedLanguage].msgWelcomeBack))
         .catch(error => {
-            if (error.code === 'auth/user-not-found') {
-                showToast("أنت لا تمتلك حساباً مسجلاً بهذا البريد! الرجاء إنشاء حساب جديد.", 'error');
-            } else if (error.code === 'auth/wrong-password') {
-                showToast("كلمة المرور غير صحيحة!", 'error');
-            } else {
-                showToast(error.message, 'error');
-            }
+            if (error.code === 'auth/user-not-found') showToast(i18n[selectedLanguage].msgUserNotFound, 'error');
+            else if (error.code === 'auth/wrong-password') showToast(i18n[selectedLanguage].msgWrongPass, 'error');
+            else showToast(error.message, 'error');
         });
 });
 
-// Email/Password Signup
 registerBtn.addEventListener('click', () => {
     const email = signUpEmailInput.value;
     const password = signUpPasswordInput.value;
+    
+    if (!isPasswordValid) {
+        showToast(i18n[selectedLanguage].msgReqNotMet, 'error');
+        return;
+    }
+
     auth.createUserWithEmailAndPassword(email, password)
-        .then(() => showToast('Account created successfully!'))
+        .then(() => showToast(i18n[selectedLanguage].msgAccCreated))
         .catch(error => {
-            if (error.code === 'auth/email-already-in-use') {
-                showToast("عفواً، أنت تمتلك حساباً بالفعل بهذا البريد! الرجاء تسجيل الدخول.", 'error');
-            } else {
-                showToast(error.message, 'error');
-            }
+            if (error.code === 'auth/email-already-in-use') showToast(i18n[selectedLanguage].msgEmailInUse, 'error');
+            else showToast(error.message, 'error');
         });
 });
 
-// Google Login
 googleLoginBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
         .then((result) => {
             if (result.additionalUserInfo.isNewUser) {
                 result.user.delete().then(() => {
                     auth.signOut();
-                    showToast("لا يوجد حساب مرتبط ببريد Google هذا! الرجاء إنشاء حساب جديد أولاً.", 'error');
+                    showToast(i18n[selectedLanguage].msgGoogleNoAcc, 'error');
                 });
             } else {
-                showToast('Google sign-in successful!');
+                showToast(i18n[selectedLanguage].msgGoogleSuccess);
             }
         })
         .catch((error) => showToast(error.message, 'error'));
 });
 
-// Google Signup
 googleSignUpBtn.addEventListener('click', () => {
     auth.signInWithPopup(googleProvider)
         .then((result) => {
             if (!result.additionalUserInfo.isNewUser) {
-                showToast("أنت تمتلك حساباً بالفعل مرتبطاً بـ Google هذا! تم تسجيل دخولك بنجاح.");
+                showToast(i18n[selectedLanguage].msgGoogleAlready);
             } else {
-                showToast('Account created successfully with Google!');
+                showToast(i18n[selectedLanguage].msgAccCreated);
             }
         })
         .catch((error) => showToast(error.message, 'error'));
 });
 
-// Facebook Login
-facebookLoginBtn.addEventListener('click', () => {
-    auth.signInWithPopup(facebookProvider)
-        .then((result) => {
-            if (result.additionalUserInfo.isNewUser) {
-                result.user.delete().then(() => {
-                    auth.signOut();
-                    showToast("لا يوجد حساب مرتبط بـ Facebook هذا! الرجاء إنشاء حساب جديد أولاً.", 'error');
-                });
-            } else {
-                showToast('Facebook sign-in successful!');
-            }
-        })
-        .catch((error) => {
-            if(error.code === 'auth/account-exists-with-different-credential') {
-                showToast("هذا البريد مسجل بالفعل بطريقة أخرى (مثل Google أو إيميل عادي). الرجاء تسجيل الدخول بتلك الطريقة.", 'error');
-            } else {
-                showToast(error.message, 'error');
-            }
-        });
-});
-
-// Facebook Signup
-facebookSignUpBtn.addEventListener('click', () => {
-    auth.signInWithPopup(facebookProvider)
-        .then((result) => {
-            if (!result.additionalUserInfo.isNewUser) {
-                showToast("أنت تمتلك حساباً بالفعل مرتبطاً بـ Facebook هذا! تم تسجيل دخولك بنجاح.");
-            } else {
-                showToast('Account created successfully with Facebook!');
-            }
-        })
-        .catch((error) => {
-            if(error.code === 'auth/account-exists-with-different-credential') {
-                showToast("هذا البريد مسجل بالفعل بطريقة أخرى (مثل Google أو إيميل عادي). الرجاء تسجيل الدخول بتلك الطريقة.", 'error');
-            } else {
-                showToast(error.message, 'error');
-            }
-        });
-});
-
 logoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => showToast('Logged out securely.'));
+    auth.signOut().then(() => showToast(i18n[selectedLanguage].msgLoggedOut));
 });
 
-// --- حركة اللوحة الجانبية (Slider) ---
 signUpButton.addEventListener("click", function () {
     if (!signUpHolder.classList.contains("switched")) {
         signUpHolder.classList.remove("unswitched");
         signUpHolder.classList.add("switched");
         signUp.classList.remove("hidden");
         signIn.classList.add("hidden");
-        holderH1.innerHTML = "Already have an account?";
-        holderH3.innerHTML = "Sign-in to continue tracking your progress!";
-        signUpButton.innerHTML = "Sign In";
     } else {
         signUpHolder.classList.remove("switched");
         signUpHolder.classList.add("unswitched");
         signIn.classList.remove("hidden");
         signUp.classList.add("hidden");
-        holderH1.innerHTML = "Welcome To Elite!";
-        holderH3.innerHTML = "If you are new here and don't know where to start, just sign up!";
-        signUpButton.innerHTML = "Create Account";
     }
+    updateSliderText(); 
 });
 
 mobileSignUp.addEventListener("click", function () {
@@ -224,7 +375,6 @@ mobileSignIn.addEventListener("click", function () {
     }, 300);
 });
 
-// --- وظائف التطبيق (Habit Tracker Logic) ---
 function loadUserData() {
     db.collection('users').doc(currentUser.uid).get().then(doc => {
         if (doc.exists) {
@@ -235,7 +385,7 @@ function loadUserData() {
             habits = [];
             state = {};
         }
-        buildGrid(currentRealMonth);
+        buildGrid(monthSelect.value || currentRealMonth);
     }).catch(error => console.log(error));
 }
 
@@ -264,16 +414,6 @@ function updateClock() {
 
 setInterval(updateClock, 1000);
 updateClock();
-
-monthNames.forEach((month, index) => {
-    const option = document.createElement('option');
-    option.value = index;
-    option.textContent = month;
-    if (index === currentRealMonth) {
-        option.selected = true;
-    }
-    monthSelect.appendChild(option);
-});
 
 function getMonthState(monthIndex, daysInMonth) {
     if (!state[monthIndex]) {
@@ -306,7 +446,7 @@ function deleteHabit(hIndex) {
             dayArray.splice(hIndex, 1);
         });
     });
-    showToast('Habit removed', 'error');
+    showToast(i18n[selectedLanguage].msgHabitRemoved, 'error');
     saveUserData();
     buildGrid(monthSelect.value);
 }
@@ -331,7 +471,7 @@ function buildGrid(monthIndex) {
     const daysInMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
     getMonthState(monthIndex, daysInMonth);
     
-    currentDateDisplay.textContent = `${monthNames[monthIndex]} ${currentYear}`;
+    currentDateDisplay.textContent = `${i18n[selectedLanguage].monthNames[monthIndex]} ${currentYear}`;
 
     const headerRow = document.createElement('div');
     headerRow.className = 'row header-row';
@@ -441,7 +581,6 @@ function buildGrid(monthIndex) {
             draggedIndex = null;
         });
 
-        // أزرار التحكم
         const actionBtns = document.createElement('div');
         actionBtns.className = 'action-btns';
 
@@ -458,7 +597,6 @@ function buildGrid(monthIndex) {
         nameSpan.className = 'habit-text-span';
         nameSpan.textContent = habit;
 
-        // التعديل المدمج
         editBtn.onclick = () => {
             if (nameDiv.querySelector('.edit-input')) return;
 
@@ -477,7 +615,7 @@ function buildGrid(monthIndex) {
                 if (newText && newText !== currentText) {
                     habits[hIndex] = newText;
                     saveUserData();
-                    showToast('Habit updated successfully!');
+                    showToast(i18n[selectedLanguage].msgHabitUpdated);
                 }
                 buildGrid(monthSelect.value); 
             };
@@ -604,7 +742,7 @@ addHabitBtn.addEventListener('click', () => {
             });
         });
         newHabitInput.value = '';
-        showToast('Habit cultivated successfully!');
+        showToast(i18n[selectedLanguage].msgHabitAdded);
         saveUserData();
         buildGrid(monthSelect.value);
     }

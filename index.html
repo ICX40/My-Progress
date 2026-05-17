@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,101 +9,115 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://kit.fontawesome.com/3b31cb99f3.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div id="authContainer" class="auth-wrapper">
-        <h1 class="main-title">Elite Tracker</h1>
+    <div id="languageContainer" class="language-wrapper" style="display: none;">
+        <div class="language-card">
+            <h2>Elite Tracker</h2>
+            <p>Please select your preferred language<br><span style="font-size: 13px; color: var(--primary-gold);">الرجاء اختيار لغتك المفضلة</span></p>
+            
+            <div class="lang-options">
+                <button class="lang-btn" id="btnLangEn">
+                    <img src="https://flagcdn.com/w40/gb.png" alt="English"> English
+                </button>
+                <button class="lang-btn" id="btnLangAr">
+                    <img src="https://flagcdn.com/w40/eg.png" alt="Arabic"> العربية
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="authContainer" class="auth-wrapper" style="display: none;">
+        <h1 class="main-title" data-i18n="appTitle">Elite Tracker</h1>
         
         <div class="login-container">
             <div class="sign-in" id="sign-in">
-                <h2>Welcome Back</h2>
-                <p class="subtitle">Sign in to continue your journey</p>
+                <h2 data-i18n="welcomeBack">Welcome Back</h2>
+                <p class="subtitle" data-i18n="signInSub">Sign in to continue your journey</p>
                 
                 <div class="login-form">
                     <div class="login-element">
-                        <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="loginEmailInput" placeholder="Email Address" />
+                        <i class="fa-solid fa-envelope icon-left"></i>
+                        <input type="email" id="loginEmailInput" data-i18n-placeholder="email" placeholder="Email Address" />
                     </div>
                     <div class="login-element">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="loginPasswordInput" placeholder="Password" />
+                        <i class="fa-solid fa-lock icon-left"></i>
+                        <input type="password" id="loginPasswordInput" data-i18n-placeholder="password" placeholder="Password" />
+                        <i class="fa-solid fa-eye-slash toggle-password"></i>
                     </div>
                     
-                    <button class="login-button" id="loginBtn">Login</button>
+                    <button class="login-button" id="loginBtn" data-i18n="loginBtn">Login</button>
                     
                     <div class="divider">
-                        <span>OR</span>
+                        <span data-i18n="or">OR</span>
                     </div>
                     
-                    <div class="social-auth-container">
-                        <button class="google-button" id="googleLoginBtn">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" class="social-icon" />
-                            Login with Google
-                        </button>
-                        
-                        <button class="facebook-button" id="facebookLoginBtn">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" alt="Facebook" class="social-icon" />
-                            Login with Facebook
-                        </button>
-                    </div>
+                    <button class="google-button" id="googleLoginBtn">
+                        <img src="form ico/Google.png" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg'" alt="Google" class="google-icon" />
+                        <span data-i18n="loginGoogle">Login with Google</span>
+                    </button>
                     
-                    <h4 id="mobile-sign-up" class="mobile-link">Create Account</h4>
+                    <h4 id="mobile-sign-up" class="mobile-link" data-i18n="mobileCreate">Create Account</h4>
                 </div>
             </div>
 
             <div class="sign-up-holder">
-                <h1 id="holder-h1">Welcome To Elite!</h1>
-                <h3 id="holder-h3">
+                <h1 id="holder-h1" data-i18n="sliderH1Unswitched">Welcome To Elite!</h1>
+                <h3 id="holder-h3" data-i18n="sliderH3Unswitched">
                     If you are new here and don't know where to start, just sign up to start your journey!
                 </h3>
-                <button id="sign-up-button">Create Account</button>
+                <button id="sign-up-button" data-i18n="sliderBtnUnswitched">Create Account</button>
             </div>
 
             <div class="sign-up hidden" id="sign-up">
-                <h2>Create Account</h2>
-                <p class="subtitle">Join us and start tracking</p>
+                <h2 data-i18n="createAcc">Create Account</h2>
+                <p class="subtitle" data-i18n="createAccSub">Join us and start tracking</p>
 
                 <div class="login-form">
                     <div class="login-element">
-                        <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="signUpEmailInput" placeholder="Email Address" />
-                    </div>
-                    <div class="login-element">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="signUpPasswordInput" placeholder="Password" />
-                    </div>
-                    <button class="login-button" id="registerBtn">Sign Up</button>
-
-                    <div class="divider">
-                        <span>OR</span>
+                        <i class="fa-solid fa-envelope icon-left"></i>
+                        <input type="email" id="signUpEmailInput" data-i18n-placeholder="email" placeholder="Email Address" />
                     </div>
                     
-                    <div class="social-auth-container">
-                        <button class="google-button" id="googleSignUpBtn">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google" class="social-icon" />
-                            Sign up with Google
-                        </button>
-                        
-                        <button class="facebook-button" id="facebookSignUpBtn">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" alt="Facebook" class="social-icon" />
-                            Sign up with Facebook
-                        </button>
+                    <div class="login-element">
+                        <i class="fa-solid fa-lock icon-left"></i>
+                        <input type="password" id="signUpPasswordInput" data-i18n-placeholder="password" placeholder="Password" />
+                        <i class="fa-solid fa-eye-slash toggle-password"></i>
                     </div>
 
-                    <h4 id="mobile-sign-in" class="mobile-link">Already have an account?</h4>
+                    <div class="password-requirements" id="passwordReqs">
+                        <div class="requirement" id="req-length"><i class="fa-solid fa-xmark req-invalid"></i> <span data-i18n="reqLength">6 characters minimum</span></div>
+                        <div class="requirement" id="req-upper"><i class="fa-solid fa-xmark req-invalid"></i> <span data-i18n="reqUpper">Uppercase letter (A-Z)</span></div>
+                        <div class="requirement" id="req-lower"><i class="fa-solid fa-xmark req-invalid"></i> <span data-i18n="reqLower">Lowercase letter (a-z)</span></div>
+                        <div class="requirement" id="req-number"><i class="fa-solid fa-xmark req-invalid"></i> <span data-i18n="reqNumber">Number (0-9)</span></div>
+                        <div class="requirement" id="req-special"><i class="fa-solid fa-xmark req-invalid"></i> <span data-i18n="reqSpecial">Special character (!@#$%^&*)</span></div>
+                    </div>
+
+                    <button class="login-button" id="registerBtn" data-i18n="signUpBtn">Sign Up</button>
+
+                    <div class="divider">
+                        <span data-i18n="or">OR</span>
+                    </div>
+                    
+                    <button class="google-button" id="googleSignUpBtn">
+                        <img src="form ico/Google.png" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg'" alt="Google" class="google-icon" />
+                        <span data-i18n="signUpGoogle">Sign up with Google</span>
+                    </button>
+
+                    <h4 id="mobile-sign-in" class="mobile-link" data-i18n="mobileAlready">Already have an account?</h4>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="appContainer" class="app-container">
+    <div id="appContainer" class="app-container" style="display: none;">
         <div class="header-top">
             <div class="clock-container" id="liveClock"></div>
             <div class="header-actions">
                 <select class="month-selector" id="monthSelect"></select>
-                <button class="logout-btn" id="logoutBtn">Logout</button>
+                <button class="logout-btn" id="logoutBtn" data-i18n="logout">Logout</button>
             </div>
         </div>
         
@@ -114,8 +128,8 @@
         </div>
         
         <div class="add-habit-container">
-            <input type="text" class="add-habit-input" id="newHabitInput" placeholder="Enter new habit...">
-            <button class="add-habit-btn" id="addHabitBtn">Add Habit</button>
+            <input type="text" class="add-habit-input" id="newHabitInput" data-i18n-placeholder="newHabit" placeholder="Enter new habit...">
+            <button class="add-habit-btn" id="addHabitBtn" data-i18n="addHabit">Add Habit</button>
         </div>
     </div>
 

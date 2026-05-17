@@ -27,6 +27,165 @@ body {
     padding: 20px;
 }
 
+/* ---------------------------------------------------- */
+/* الإصلاح الشامل لاتجاهات التصميم في اللغة العربية RTL */
+/* ---------------------------------------------------- */
+[dir="rtl"] {
+    font-family: 'Cairo', sans-serif;
+}
+
+[dir="rtl"] .sign-up-holder {
+    left: auto;
+    right: 50%;
+    /* اللوحة في الشمال، الانحناء يكون للداخل من جهة اليمين */
+    border-radius: 0;
+    border-top-right-radius: 30%;
+    border-bottom-right-radius: 30%;
+}
+
+[dir="rtl"] .switched {
+    transform: translateX(100%);
+    /* اللوحة تتحرك لليمين، الانحناء يكون للداخل من جهة اليسار */
+    border-radius: 0;
+    border-top-left-radius: 30%;
+    border-bottom-left-radius: 30%;
+}
+
+[dir="rtl"] .unswitched {
+    transform: translateX(0%);
+    /* ترجع لليسار، يرجع الانحناء لليمين */
+    border-radius: 0;
+    border-top-right-radius: 30%;
+    border-bottom-right-radius: 30%;
+}
+
+[dir="rtl"] .login-element input {
+    padding-left: 35px;
+    padding-right: 10px;
+}
+
+[dir="rtl"] .toggle-password {
+    right: auto;
+    left: 15px;
+}
+
+[dir="rtl"] .habit-name {
+    padding-right: 0;
+    padding-left: 15px;
+    border-right: none;
+    border-left: 1px solid var(--border-color);
+    right: 0; 
+    left: auto;
+}
+
+[dir="rtl"] .action-btns {
+    margin-right: 0;
+    margin-left: 15px;
+}
+
+[dir="rtl"] .drag-handle {
+    margin-right: 0;
+    margin-left: 12px;
+}
+
+[dir="rtl"] .progress-section {
+    margin-left: 0;
+    margin-right: 25px;
+    padding-right: 0;
+    padding-left: 15px;
+}
+
+[dir="rtl"] .percentage-text {
+    margin-left: 0;
+    margin-right: 15px;
+    text-align: left;
+}
+
+/* --- تصميم شاشة اللغات --- */
+.language-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--bg-main);
+    background-image: radial-gradient(circle at 50% 0%, #1e1e24 0%, transparent 50%);
+    z-index: 1000;
+}
+
+.language-card {
+    background: rgba(24, 24, 27, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+    width: 90%;
+}
+
+.language-card h2 {
+    color: var(--text-main);
+    margin-bottom: 5px;
+    font-size: 2rem;
+}
+
+.language-card p {
+    color: var(--text-muted);
+    margin-bottom: 30px;
+    line-height: 1.6;
+    font-size: 15px;
+}
+
+.lang-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.lang-btn {
+    background-color: rgba(9, 9, 11, 0.8);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.lang-btn img {
+    width: 24px;
+    border-radius: 4px;
+}
+
+.lang-btn:hover {
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 15px var(--primary-gold-glow);
+    transform: translateY(-2px);
+}
+
+/* حل مشكلة الإكمال التلقائي */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 50px rgba(9, 9, 11, 0.9) inset !important;
+    -webkit-text-fill-color: var(--text-main) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
 /* --- Authentication Section --- */
 .auth-wrapper {
     display: flex;
@@ -52,7 +211,8 @@ body {
     background-color: var(--bg-surface);
     width: 100%;
     max-width: 850px;
-    height: 600px; /* تم زيادة الطول قليلاً لاستيعاب الزرين */
+    min-height: 600px;
+    height: auto;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     border: 1px solid var(--border-color);
@@ -81,7 +241,7 @@ body {
 .subtitle {
     color: var(--text-muted);
     font-size: 14px;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
 }
 
 .login-form {
@@ -89,16 +249,17 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
 }
 
 .login-element {
+    position: relative;
     display: flex;
     align-items: center;
     background-color: rgba(9, 9, 11, 0.8);
     border: 1px solid var(--border-color);
     width: 100%;
-    height: 45px;
+    height: 50px;
     border-radius: 12px;
     padding: 0 15px;
     transition: 0.3s;
@@ -115,28 +276,75 @@ body {
     outline: none;
     width: 100%;
     height: 100%;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--text-main);
     padding-left: 10px;
+    padding-right: 35px;
     font-family: inherit;
 }
 
-.login-element i {
+.icon-left {
     color: var(--text-muted);
-    font-size: 16px;
+    font-size: 18px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 18px;
+    transition: 0.3s;
+}
+
+.toggle-password:hover {
+    color: var(--primary-gold);
+}
+
+.password-requirements {
+    width: 100%;
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: -5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s ease;
+}
+
+.req-invalid {
+    color: var(--danger);
+    font-size: 14px;
+}
+
+.req-valid {
+    color: #22c55e; 
+    font-size: 14px;
+}
+
+.requirement.valid-text {
+    color: var(--text-main);
 }
 
 .login-button {
     width: 100%;
-    height: 45px;
+    height: 50px;
     border-radius: 12px;
     border: none;
     background: linear-gradient(135deg, var(--primary-gold), #b28d22);
     color: #000;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     font-family: inherit;
-    margin-top: 5px;
+    margin-top: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px var(--primary-gold-glow);
@@ -147,21 +355,14 @@ body {
     box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
 }
 
-.social-auth-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
 .google-button {
     width: 100%;
-    height: 45px;
+    height: 50px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
     background-color: #fff;
     color: #09090b;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -176,32 +377,11 @@ body {
     box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
 }
 
-/* ستايل زر الفيسبوك الجديد */
-.facebook-button {
-    width: 100%;
-    height: 45px;
-    border-radius: 12px;
-    border: 1px solid #1877F2;
-    background-color: #1877F2;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.facebook-button:hover {
-    background-color: #166FE5;
-    box-shadow: 0 4px 15px rgba(24, 119, 242, 0.4);
-}
-
-.social-icon {
-    width: 20px;
-    height: 20px;
+.google-icon {
+    width: 20px !important;
+    height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
     object-fit: contain;
 }
 
@@ -212,7 +392,7 @@ body {
     text-align: center;
     color: var(--text-muted);
     font-size: 12px;
-    margin: 2px 0;
+    margin: 5px 0;
 }
 
 .divider::before, .divider::after {
