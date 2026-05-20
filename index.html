@@ -133,6 +133,19 @@
                     <i class="fa-solid fa-download"></i>
                 </button>
 
+                <div class="missions-wrapper">
+                    <button id="toggleMissionsBtn" class="leaderboard-btn" title="Daily Missions">
+                        <i class="fa-solid fa-scroll"></i>
+                    </button>
+                    <div class="dropdown-menu missions-dropdown" id="missionsDropdown">
+                        <div class="missions-header">
+                            <h4 data-i18n="dailyMissionsHeader">مهام اليوم النورانية</h4>
+                            <span class="missions-date" id="missionsDate"></span>
+                        </div>
+                        <div id="missionsList" class="missions-list"></div>
+                    </div>
+                </div>
+
                 <button id="toggleLeaderboardBtn" class="leaderboard-btn" title="Leaderboard">
                     <i class="fa-solid fa-trophy"></i>
                 </button>
@@ -211,6 +224,18 @@
                 </div>
 
                 <button id="saveProfileBtn" class="login-button" data-i18n="saveChanges" style="margin-top: 10px;">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="customDialogOverlay" class="modal-overlay" style="display: none; z-index: 3000;">
+        <div class="modal-content custom-dialog">
+            <h3 id="dialogTitle">Title</h3>
+            <p id="dialogMessage" style="display: none; color: var(--text-muted); font-size: 14px; margin-bottom: 15px;"></p>
+            <input type="text" id="dialogInput" class="modal-input" style="display: none; margin-bottom: 20px;">
+            <div class="dialog-actions">
+                <button id="dialogCancelBtn" class="dialog-btn cancel-btn">إلغاء</button>
+                <button id="dialogConfirmBtn" class="dialog-btn confirm-btn">تأكيد</button>
             </div>
         </div>
     </div>
