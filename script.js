@@ -15,22 +15,30 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-// قوالب الطاعات الإسلامية التلقائية للحسابات الجديدة
+// قوالب الطاعات الإسلامية التلقائية للحسابات الجديدة (معدلة مفصلة)
 const defaultIslamicHabitsAR = [
-    "الصلوات الخمس في وقتها 🕌",
-    "أذكار الصباح والمساء 📿",
+    "صلاة الفجر 🕌",
+    "صلاة الظهر 🕌",
+    "صلاة العصر 🕌",
+    "صلاة المغرب 🕌",
+    "صلاة العشاء 🕌",
+    "أذكار الصباح 🌅",
+    "أذكار المساء 🌙",
     "ورد القرآن الكريم 📖",
     "صلاة الضحى ☀️",
-    "الوتر / قيام الليل 🌙",
-    "سورة الكهف (الجمعة) ✨"
+    "الوتر / قيام الليل 🌌"
 ];
 const defaultIslamicHabitsEN = [
-    "Five Daily Prayers 🕌",
-    "Morning/Evening Adhkar 📿",
+    "Fajr Prayer 🕌",
+    "Dhuhr Prayer 🕌",
+    "Asr Prayer 🕌",
+    "Maghrib Prayer 🕌",
+    "Isha Prayer 🕌",
+    "Morning Adhkar 🌅",
+    "Evening Adhkar 🌙",
     "Daily Quran Reading 📖",
     "Duha Prayer ☀️",
-    "Witr / Night Prayer 🌙",
-    "Surah Al-Kahf (Friday) ✨"
+    "Witr / Night Prayer 🌌"
 ];
 
 // نظام اللغات والترجمة
@@ -387,7 +395,7 @@ function loadUserData() {
             if(data.photoURL) finalPhoto = data.photoURL;
             if(data.bio) finalBio = data.bio;
         } else {
-            // تزويد المستخدم الجديد بالطاعات الإسلامية الأساسية تلقائياً تلقائياً
+            // تزويد المستخدم الجديد بالطاعات الإسلامية الأساسية تلقائياً
             habits = selectedLanguage === 'ar' ? [...defaultIslamicHabitsAR] : [...defaultIslamicHabitsEN];
             state = {}; userPoints = 0;
             const daysInMonth = new Date(currentYear, currentRealMonth + 1, 0).getDate();
@@ -475,11 +483,102 @@ function checkPrayerReminders() {
 // طلب صلاحية الإشعارات
 if ("Notification" in window && Notification.permission === "default") { Notification.requestPermission(); }
 
+// --- نظام التنبيهات الذكية (الصلاة المنسية + الأذكار + حصاد اليوم) ---
+let notifiedPrayers = { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
+let notifiedAdhkarAfter = { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
+let notifiedEndOfDay = false;
+
+function getMinutesFromHHMM(hhmm) {
+    let parts = hhmm.split(':');
+    return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+}
+
+function sendPushNotification(title, body) {
+    if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(title, { body: body, icon: "form ico/123.jpg" });
+    }
+}
+
+function checkSmartReminders() {
+    if (!prayerTimings || !currentUser || habits.length === 0) return;
+
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    const todayState = state[currentRealMonth]?.[currentRealDay - 1];
+    if (!todayState) return;
+
+    const prayers = [
+        { key: 'Fajr', ar: 'صلاة الفجر 🕌', en: 'Fajr Prayer 🕌', nameAr: 'الفجر', nameEn: 'Fajr' },
+        { key: 'Dhuhr', ar: 'صلاة الظهر 🕌', en: 'Dhuhr Prayer 🕌', nameAr: 'الظهر', nameEn: 'Dhuhr' },
+        { key: 'Asr', ar: 'صلاة العصر 🕌', en: 'Asr Prayer 🕌', nameAr: 'العصر', nameEn: 'Asr' },
+        { key: 'Maghrib', ar: 'صلاة المغرب 🕌', en: 'Maghrib Prayer 🕌', nameAr: 'المغرب', nameEn: 'Maghrib' },
+        { key: 'Isha', ar: 'صلاة العشاء 🕌', en: 'Isha Prayer 🕌', nameAr: 'العشاء', nameEn: 'Isha' }
+    ];
+
+    prayers.forEach(prayer => {
+        const pTime = prayerTimings[prayer.key];
+        if (!pTime) return;
+        const pMins = getMinutesFromHHMM(pTime);
+
+        // 1. تنبيه أذكار دبر الصلاة (بعد الأذان بـ 15 دقيقة)
+        if (currentMins >= pMins + 15 && currentMins < pMins + 45 && !notifiedAdhkarAfter[prayer.key]) {
+            const msg = selectedLanguage === 'ar' ? 
+                `تقبل الله! لا تنسَ أذكار دبر صلاة ${prayer.nameAr} 📿` : 
+                `May Allah accept! Don't forget Adhkar after ${prayer.nameEn} 📿`;
+            showToast(msg, 'success');
+            sendPushNotification(selectedLanguage === 'ar' ? "أذكار الصلاة" : "Post-Prayer Adhkar", msg);
+            notifiedAdhkarAfter[prayer.key] = true;
+        }
+
+        // 2. تنبيه الصلاة المنسية (بعد الأذان بـ 30 دقيقة)
+        if (currentMins >= pMins + 30 && currentMins < pMins + 120 && !notifiedPrayers[prayer.key]) {
+            const habitIdx = habits.findIndex(h => h === prayer.ar || h === prayer.en);
+            if (habitIdx !== -1 && !todayState[habitIdx]) {
+                const msg = selectedLanguage === 'ar' ? 
+                    `مر نصف ساعة على أذان ${prayer.nameAr} ولم تسجلها.. هل صليت؟ 🕌` : 
+                    `30 mins passed since ${prayer.nameEn}. Did you pray? 🕌`;
+                showToast(msg, 'error');
+                sendPushNotification(selectedLanguage === 'ar' ? "تذكير بالصلاة" : "Prayer Reminder", msg);
+                notifiedPrayers[prayer.key] = true;
+            }
+        }
+    });
+
+    // 3. التذكير بالمهام اللي نسيها طول اليوم (بتشتغل الساعة 10:30 بالليل)
+    if (currentMins >= 22 * 60 + 30 && !notifiedEndOfDay) {
+        let missingHabits = [];
+        habits.forEach((h, idx) => {
+            if (!todayState[idx]) missingHabits.push(h);
+        });
+
+        if (missingHabits.length > 0) {
+            const msg = selectedLanguage === 'ar' ? 
+                `يومك يوشك على الانتهاء! تبقى لك: ${missingHabits.slice(0, 2).join('، ')} ${missingHabits.length > 2 ? 'وغيرها...' : ''}` : 
+                `Day is almost over! You missed: ${missingHabits.slice(0, 2).join(', ')} ${missingHabits.length > 2 ? 'and more...' : ''}`;
+            showToast(msg, 'error');
+            sendPushNotification(selectedLanguage === 'ar' ? "حصاد اليوم" : "Daily Summary", msg);
+        }
+        notifiedEndOfDay = true;
+    }
+    
+    // تصفير المتغيرات لليوم الجديد عند الساعة 00:00
+    if (currentMins === 0) {
+        for(let key in notifiedPrayers) notifiedPrayers[key] = false;
+        for(let key in notifiedAdhkarAfter) notifiedAdhkarAfter[key] = false;
+        notifiedEndOfDay = false;
+    }
+}
+
 // العداد المشغل للمواقيت والكل أوتوماتيكياً
 setInterval(() => {
     const now = new Date(); liveClock.textContent = now.toLocaleTimeString('en-US', { hour12: true });
     const secs = now.getSeconds();
-    if(secs === 0) { updateIslamicReminder(); checkTimeBasedToasts(); checkPrayerReminders(); }
+    if(secs === 0) { 
+        updateIslamicReminder(); 
+        checkTimeBasedToasts(); 
+        checkPrayerReminders(); 
+        checkSmartReminders(); 
+    }
 }, 1000);
 fetchPrayerTimes();
 
@@ -574,6 +673,7 @@ function buildGrid(monthIndex) {
     if (habits.length > 0) updateAllProgress(monthIndex, daysInMonth, statusElements, habitFills, habitTexts);
 }
 
+// التحديث الجديد لنظام الـ UI اللي بيعمل نقطة خضرا وعلامة صح احترافية
 function updateAllProgress(monthIndex, daysInMonth, statusElements, habitFills, habitTexts) {
     if (habits.length === 0) return;
     for (let d = 0; d < daysInMonth; d++) {
@@ -581,13 +681,28 @@ function updateAllProgress(monthIndex, daysInMonth, statusElements, habitFills, 
         const isToday = monthIndex === currentRealMonth && (d + 1) === currentRealDay;
         const percent = calculateDayProgress(monthIndex, d);
         const statusDiv = statusElements[d];
-        if (isToday) statusDiv.innerHTML = `<span style="color:var(--primary-gold);font-size:16px;">✦</span><div class="percent-text">${percent}%</div>`;
-        else if (isPast) statusDiv.innerHTML = percent === 0 ? '<span style="opacity:0.3;">-</span>' : `<span style="color:var(--text-muted);font-size:12px;">✓</span><div class="percent-text" style="color:var(--text-muted)">${percent}%</div>`;
-        else statusDiv.innerHTML = '';
+        
+        if (isToday) {
+            // شكل عصري لليوم الحالي (نقطة خضراء)
+            statusDiv.innerHTML = `<i class="fa-solid fa-circle" style="color:var(--primary); font-size:10px;"></i><div class="percent-text">${percent}%</div>`;
+        } else if (isPast) {
+            if (percent === 0) {
+                statusDiv.innerHTML = '<span style="opacity:0.2; font-weight:bold;">-</span>';
+            } else {
+                // علامة صح احترافية للأيام السابقة المنجزة
+                statusDiv.innerHTML = `<i class="fa-solid fa-check" style="color:var(--text-muted); font-size:12px;"></i><div class="percent-text" style="color:var(--text-muted)">${percent}%</div>`;
+            }
+        } else {
+            statusDiv.innerHTML = '';
+        }
     }
+    
     habits.forEach((_, hIndex) => {
         const percent = calculateHabitProgress(monthIndex, hIndex, daysInMonth);
-        if(habitFills[hIndex]) { habitFills[hIndex].style.width = percent + '%'; habitTexts[hIndex].textContent = percent + '%'; }
+        if(habitFills[hIndex]) { 
+            habitFills[hIndex].style.width = percent + '%'; 
+            habitTexts[hIndex].textContent = percent + '%'; 
+        }
     });
 }
 
@@ -604,7 +719,7 @@ monthSelect.addEventListener('change', (e) => buildGrid(e.target.value));
 
 // --- جلب ومعالجة لوحة صدارة المتنافسين ---
 async function fetchLeaderboard() {
-    podiumContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; width: 100%; padding: 20px;"><i class="fa-solid fa-spinner fa-spin" style="color: var(--primary-gold); font-size: 30px;"></i></div>';
+    podiumContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; width: 100%; padding: 20px;"><i class="fa-solid fa-spinner fa-spin" style="color: var(--primary); font-size: 30px;"></i></div>';
     leaderboardList.innerHTML = '';
     try {
         const snapshot = await db.collection('users').orderBy('points', 'desc').limit(20).get();
@@ -614,7 +729,7 @@ async function fetchLeaderboard() {
             if (data.points && data.points > 0) {
                 users.push({
                     name: data.displayName || 'Elite Muslim',
-                    photo: data.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.displayName || 'Muslim')}&background=d4af37&color=000&bold=true`,
+                    photo: data.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.displayName || 'Muslim')}&background=10b981&color=fff&bold=true`,
                     points: data.points
                 });
             }
